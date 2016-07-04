@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>AutoCorrect</name>
+	<description></description>
+	<homepage></homepage>
+	<keywords>AutoCorrect,Auto,Correct</keywords>
+	<license>MIT</license>
+	<version>0.1.0</version>
+	<authors>
+		<author>Eric Cornelissen</author>
+		<e-mail>ericornelissen@gmail.com</e-mail>
+	</authors>
+	<repository>
+	    <type>git</type>
+	    <url></url>
+	</repository>
+</projectDescription>

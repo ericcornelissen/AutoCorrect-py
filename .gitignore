@@ -1,0 +1,2 @@
+# Ignore Python generated paths
+__pycache__
