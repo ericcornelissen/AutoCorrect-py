@@ -1,38 +1,72 @@
+"""
+autocorrect.py
+==============
+AutoCorrect is a Python module that is a
+special dictionary that has build-in
+capabilities for autocorrecting based on
+a simple learning-algorithm.
+
+Copyright 2016 Eric Cornelissen
+Released under the MIT license
+
+Date: 04.07.2016
+"""
+
 ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
 class CharNode(object):
-	def __init__(self, char):
+	def __init__(self, char, alphabet):
 		self.char = char
+		self.children = [None] * len(alphabet)
 		self.is_word = False
 		self.use_count = 0
-		self.children = [None] * len(ALPHABET)
 
-def char_index(char):
-	"""Get the charachter index in the alphabet"""
-	try:
-		char = char.lower()
-		return ALPHABET.index(char)
-	except:
-		return -1
+class AutoCorrect(object):
+	def __init__(self, alphabet=ALPHABET):
+		self.__ROOT__ = CharNode('root', alphabet)
+		self.__ALPHABET__ = alphabet
 
-def learn_word(word):
-	"""Learn a new word"""
-	current_node = ROOT
-	word = word.lower()
+	def __index__(self, char):
+		"""Get the charachter index in the alphabet"""
+		try:
+			char = char.lower()
+			return self.__ALPHABET__.index(char)
+		except:
+			return -1
 
-	for i in range(len(word)):
-		charachter_index = char_index(word[i])
+	def find_word(self, word):
+		"""Find a word in the dictionary"""
+		current_node = self.__ROOT__
+		for char in word:
+			index = self.__index__(char)
+			current_node = current_node.children[index]
+			if current_node is None:
+				raise LookupError
 
-		if charachter_index < 0:
-			continue
+		if current_node.is_word:
+			return (word, current_node.use_count)
+		else:
+			raise LookupError
 
-		if current_node.children[charachter_index] is None:
-			current_node.children[charachter_index] = CharNode(word[i])
+	def learn_word(self, word):
+		"""Learn a new word to the dictionary"""
+		current_node = self.__ROOT__
+		word = word.lower()
 
-		current_node = current_node.children[charachter_index]
+		for i in range(len(word)):
+			charachter_index = self.__index__(word[i])
+			if charachter_index < 0:
+				continue
 
-	current_node.is_word = True
-	current_node.use_count += 1
+			if current_node.children[charachter_index] is None:
+				current_node.children[charachter_index] = CharNode(word[i], self.__ALPHABET__)
 
-ROOT = CharNode('ROOT')
-learn_word('hello')
+			current_node = current_node.children[charachter_index]
+
+		current_node.is_word = True
+		current_node.use_count += 1
+
+my_dict = AutoCorrect()
+my_dict.learn_word('hello')
+x = my_dict.find_word('hello')
+print(x)
