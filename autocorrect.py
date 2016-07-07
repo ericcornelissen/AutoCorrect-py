@@ -9,7 +9,7 @@ a simple learning-algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 04.07.2016
+Date: 07.07.2016
 """
 
 ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
@@ -48,6 +48,18 @@ class AutoCorrect(object):
 		else:
 			raise LookupError
 
+	def learn_file(self, file):
+		"""Learn a set of words from a file"""
+		f = open(file)
+		text = f.read()
+		self.learn_text(text)
+
+	def learn_text(self, text):
+		"""Learn a set of words from a string of text"""
+		text = text.split()
+		for word in text:
+			self.learn_word(word)
+
 	def learn_word(self, word):
 		"""Learn a new word to the dictionary"""
 		current_node = self.__ROOT__
@@ -67,6 +79,6 @@ class AutoCorrect(object):
 		current_node.use_count += 1
 
 my_dict = AutoCorrect()
-my_dict.learn_word('hello')
-x = my_dict.find_word('hello')
+my_dict.learn_file('text.txt')
+x = my_dict.find_word('volumes')
 print(x)
