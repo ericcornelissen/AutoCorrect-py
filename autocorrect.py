@@ -52,6 +52,80 @@ class AutoCorrect(object):
 
 		return collection
 
+
+	def __bubblesearch__(self, word, position=-2):
+		"""Find variations of a word where two characters have been swapped"""
+
+		position += 2
+		word_length = len(word)
+
+		if position > word_length:
+			return []
+
+		collection = []
+		for i in range(position, word_length - 1):
+			temp = list(word)
+			temp[i], temp[i + 1] = temp[i + 1], temp[i]
+			temp = ''.join(temp)
+
+			try:
+				word_details = self.find_word(temp)
+				collection.append(word_details)
+			except:
+				pass
+
+			collection += self.__bubblesearch__(temp, position + i)
+
+		return collection
+
+	def __missingsearch__(self, word):
+		"""Find variations of a word where one letter is missing"""
+
+		collection = []
+		prefix = ''
+		suffix = word
+
+		for i in range(len(word) + 1):
+			for letter in self.__ALPHABET__:
+				word = prefix + letter + suffix
+
+				try:
+					word_details = self.find_word(word)
+					collection.append(word_details)
+				except:
+					pass
+
+			# Move the prefix and suffix
+			try:
+				prefix += suffix[0]
+				suffix = suffix[1:]
+			except:
+				pass
+
+		return collection
+
+
+	def find_longer_words(self, prefix=''):
+		"""Find words with a given prefix in the dictionary"""
+
+		node = self.__ROOT__
+		charachters = list(prefix)
+		for character in charachters:
+			index = self.__index__(character)
+			newNode = node.children[index]
+			if newNode is None:
+				return []
+
+			node = newNode
+
+		return self.__traverse__(node, prefix)
+
+	def find_similar_words(self, word):
+		collection = []
+		collection += self.__bubblesearch__(word)
+		collection += self.__missingsearch__(word)
+		return collection
+
 	def find_word(self, word):
 		"""Find a word in the dictionary"""
 		current_node = self.__ROOT__
@@ -66,20 +140,6 @@ class AutoCorrect(object):
 		else:
 			raise LookupError
 
-	def find_words(self, prefix=''):
-		"""Find words with a given prefix in the dictionary"""
-
-		node = self.__ROOT__
-		charachters = list(prefix)
-		for character in charachters:
-			index = self.__index__(character)
-			newNode = node.children[index]
-			if newNode is None:
-				return []
-
-			node = newNode
-
-		return self.__traverse__(node, prefix)
 
 	def learn_file(self, file):
 		"""Learn a set of words from a file"""
@@ -112,6 +172,6 @@ class AutoCorrect(object):
 		current_node.use_count += 1
 
 my_dict = AutoCorrect()
-my_dict.learn_file('text.txt')
-x = my_dict.find_words('a') # Find all words starting with an 'a'
+my_dict.learn_file('~text.txt')
+x = my_dict.find_similar_words('aout')
 print(x)
