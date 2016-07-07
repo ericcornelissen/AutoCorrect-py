@@ -34,6 +34,24 @@ class AutoCorrect(object):
 		except:
 			return -1
 
+	def __traverse__(self, node=None, prefix=''):
+		"""Get all the words in the dictionary in a list"""
+
+		if node is None:
+			node = self.__ROOT__
+
+		collection = []
+		for node in node.children:
+			if node is None:
+				continue
+
+			if node.is_word:
+				collection.append((prefix + node.char, node.use_count))
+
+			collection += self.__traverse__(node, prefix + node.char)
+
+		return collection
+
 	def find_word(self, word):
 		"""Find a word in the dictionary"""
 		current_node = self.__ROOT__
@@ -47,6 +65,21 @@ class AutoCorrect(object):
 			return (word, current_node.use_count)
 		else:
 			raise LookupError
+
+	def find_words(self, prefix=''):
+		"""Find words with a given prefix in the dictionary"""
+
+		node = self.__ROOT__
+		charachters = list(prefix)
+		for character in charachters:
+			index = self.__index__(character)
+			newNode = node.children[index]
+			if newNode is None:
+				return []
+
+			node = newNode
+
+		return self.__traverse__(node, prefix)
 
 	def learn_file(self, file):
 		"""Learn a set of words from a file"""
@@ -80,5 +113,5 @@ class AutoCorrect(object):
 
 my_dict = AutoCorrect()
 my_dict.learn_file('text.txt')
-x = my_dict.find_word('volumes')
+x = my_dict.find_words('a') # Find all words starting with an 'a'
 print(x)

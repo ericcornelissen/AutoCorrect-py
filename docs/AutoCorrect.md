@@ -11,6 +11,14 @@ returned if the word is found. Otherwise, if the word wasn't found, a `LookupErr
 |------|-----------------------------------|----------|
 | word | The word you want to find.        | Yes      |
 
+### `.find_words`
+Find all words in the AutoCorrect dictionary that start with a given prefix. If no prefix is given, all words in the dictionary are returned. If there are no words with a given prefix, an empty list is returned.
+
+##### Parameters
+| Name   | Description                       | Required |
+|--------|-----------------------------------|----------|
+| prefix | The prefix words should have.     | No       |
+
 ### `.learn_file`
 Learn a set of words from a piece of text in a file. If the file is found, all words it can interpret will be learned
 by the dictionary. Otherwise, if the file wasn't found, a `FileNotFoundError`  will be thrown.
