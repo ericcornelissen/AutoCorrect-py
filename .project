@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>AutoCorrect</name>
-	<description></description>
-	<homepage></homepage>
+	<description>A simple learning dictionary to autocorrect texts</description>
 	<keywords>AutoCorrect,Auto,Correct</keywords>
 	<license>MIT</license>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 	<authors>
 		<author>Eric Cornelissen</author>
 		<e-mail>ericornelissen@gmail.com</e-mail>
 	</authors>
 	<repository>
 	    <type>git</type>
-	    <url></url>
+	    <url>https://github.com/ericcornelissen/AutoCorrect-py</url>
 	</repository>
 </projectDescription>

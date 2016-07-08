@@ -65,8 +65,8 @@ class AutoCorrect(object):
 				continue
 
 			if node['is_word']:
-				t = get_word_tuple(node, prefix + node['char'])
-				collection.append(t)
+				tup = get_word_tuple(node, prefix + node['char'])
+				collection.append(tup)
 
 			collection += self.__traverse__(node, prefix + node['char'])
 
@@ -145,9 +145,11 @@ class AutoCorrect(object):
 		"""Find words with a given prefix in the dictionary"""
 		node = self.__ROOT__
 		charachters = list(prefix)
+
 		for character in charachters:
 			index = self.__charindex__(character)
 			newNode = node['children'][index]
+
 			if newNode is None:
 				return []
 
@@ -155,12 +157,33 @@ class AutoCorrect(object):
 
 		return self.__traverse__(node, prefix)
 
-	def find_similar_words(self, word):
+	def find_similar_words(self, word, follows=None, leads=None):
 		"""Find words similar to a given word in the dictionary"""
+		candidates = []
+		candidates += self.__bubblesearch__(word)
+		candidates += self.__missingsearch__(word)
+		candidates += self.__replacementsearch__(word)
+
 		collection = []
-		collection += self.__bubblesearch__(word)
-		collection += self.__missingsearch__(word)
-		collection += self.__replacementsearch__(word)
+		for word in candidates:
+			rating = 0
+			if not follows is None:
+				followers = word[2]
+				for follower in followers:
+					if follower[0] == follows:
+						rating += follower[1]
+						break
+
+			if not leads is None:
+				leaders = word[3]
+				for leader in leaders:
+					if leader[0] == leads:
+						rating += leader[1]
+						break
+
+			collection.append((word[0], rating))
+
+		collection.sort(key=lambda tup: tup[1], reverse=True)
 		return collection
 
 	def find_word(self, word):
@@ -226,19 +249,6 @@ class AutoCorrect(object):
 
 my_dict = AutoCorrect()
 
-my_dict.learn_file('~text.txt')
-my_dict.learn_text('hey my name is foobar')
-my_dict.learn_word('abc')
-my_dict.learn_word('abcd', 'follows')
-my_dict.learn_word('abcde', 'follows', 'leads')
-
-x = my_dict.find_word('abcde')
-print(x)
-print()
-
-x = my_dict.find_longer_words('ab')
-print(x)
-print()
-
-x = my_dict.find_similar_words('abd')
-print(x)
+my_dict.learn_text('hey my name is anime')
+result = my_dict.find_similar_words('anme', 'my', 'is') # We're looking for 'name' over 'anime'
+print(result) # 'name' has a weight of 2 while 'anime' has a weight of 0

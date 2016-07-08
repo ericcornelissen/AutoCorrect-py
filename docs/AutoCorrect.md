@@ -3,7 +3,8 @@ The AutoCorret class is the main class you'll be interacting with when using thi
 is a special dictionary that is able to learn words and autocorrect texts using a simple learning-algorithm.
 
 ### `.find_longer_words`
-Find all words in the AutoCorrect dictionary that start with a given prefix. If no prefix is given, all words in the dictionary are returned. If there are no words with a given prefix, an empty list is returned.
+Find all words in the AutoCorrect dictionary that start with a given prefix. If no prefix is given, all words in the
+dictionary are returned. If there are no words with a given prefix, an empty list is returned.
 
 ##### Parameters
 | Name   | Description                       | Required |
@@ -13,10 +14,15 @@ Find all words in the AutoCorrect dictionary that start with a given prefix. If 
 ### `.find_similar_words`
 Find all words in the AutoCorrect dictionary that are similar to a given word using several different algorithms.
 
+This method will return an descending (ordered on rating) list of tuples formatted as `('word', rating)`, where the
+rating is a number that indicates how likely it is that that word is the intended word.
+
 ##### Parameters
-| Name | Description                               | Required |
-|------|-------------------------------------------|----------|
-| word | The word for which to find similar words. | Yes      |
+| Name    | Description                               | Required |
+|---------|-------------------------------------------|----------|
+| word    | The word for which to find similar words. | Yes      |
+| follows | The word the given word follows.          | No       |
+| leads   | The word the given word leads.            | No       |
 
 ### `.find_word`
 Find a word in the AutoCorrect dictionary. A tuple containing information about that word is
