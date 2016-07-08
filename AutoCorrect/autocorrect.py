@@ -1,15 +1,15 @@
 """
 autocorrect.py
 ==============
-AutoCorrect is a Python module that is a
-special dictionary that has build-in
-capabilities for autocorrecting based on
-a simple learning-algorithm.
+AutoCorrect is a Python module that contains
+a special dictionary that has build-in
+capabilities for autocorrecting based on a
+simple learning algorithm.
 
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 08.07.2016
+Date: 09.07.2016
 """
 
 ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
@@ -31,7 +31,7 @@ def surrounding_word_tuple(node, word, position):
 		node[position].append((word, 1))
 
 
-class AutoCorrect(object):
+class Dictionary(object):
 	def __init__(self, alphabet=ALPHABET):
 		self.__ALPHABET__ = alphabet
 		self.__ROOT__ = self.__createchar__('root')
@@ -202,6 +202,11 @@ class AutoCorrect(object):
 			raise LookupError
 
 
+	def get_dictionary(self):
+		"""Get all the words in the dictionary in a list"""
+		return self.__traverse__()
+
+
 	def learn_file(self, file):
 		"""Learn a set of words from a file"""
 		f = open(file)
@@ -245,10 +250,3 @@ class AutoCorrect(object):
 			surrounding_word_tuple(current_node, follows, 'follows')
 		if not leads is None:
 			surrounding_word_tuple(current_node, leads, 'leads')
-
-
-my_dict = AutoCorrect()
-
-my_dict.learn_text('hey my name is anime')
-result = my_dict.find_similar_words('anme', 'my', 'is') # We're looking for 'name' over 'anime'
-print(result) # 'name' has a weight of 2 while 'anime' has a weight of 0

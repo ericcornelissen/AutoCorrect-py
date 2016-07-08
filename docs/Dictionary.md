@@ -1,5 +1,5 @@
-# AutoCorrect
-The AutoCorret class is the main class you'll be interacting with when using this Python module. An AutoCorrect instance
+# AutoCorrect.Dictionary
+The Dictionary class is the main class you'll be interacting with when using this Python module. A Dictionary instance
 is a special dictionary that is able to learn words and autocorrect texts using a simple learning-algorithm.
 
 ### `.find_longer_words`
@@ -32,6 +32,9 @@ returned if the word is found. Otherwise, if the word wasn't found, a `LookupErr
 | Name | Description                       | Required |
 |------|-----------------------------------|----------|
 | word | The word you want to find.        | Yes      |
+
+### `.get_dictionary`
+Get a list of tuples of all words in the dictionary.
 
 ### `.learn_file`
 Learn a set of words from a piece of text in a file. If the file is found, all words it can interpret will be learned

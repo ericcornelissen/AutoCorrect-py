@@ -1,2 +1,5 @@
 # Ignore Python generated paths
 __pycache__
+AutoCorrect.egg-info
+build
+dist
