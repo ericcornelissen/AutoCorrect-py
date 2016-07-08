@@ -14,19 +14,29 @@ Date: 08.07.2016
 
 ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
-class CharNode(object):
-	def __init__(self, char, alphabet):
-		self.char = char
-		self.children = [None] * len(alphabet)
-		self.is_word = False
-		self.use_count = 0
+
+def get_word_tuple(node, word):
+	"""Get a tuple with information about a word in the dictionary"""
+	return (word, node['use_count'], node['follows'], node['leads'])
+
+def surrounding_word_tuple(node, word, position):
+	append = True
+	for index, item in enumerate(node[position]):
+		if item[0] == word:
+			node[position][index] = (word, item[1] + 1)
+			append = False
+			break
+
+	if append:
+		node[position].append((word, 1))
+
 
 class AutoCorrect(object):
 	def __init__(self, alphabet=ALPHABET):
-		self.__ROOT__ = CharNode('root', alphabet)
 		self.__ALPHABET__ = alphabet
+		self.__ROOT__ = self.__createchar__('root')
 
-	def __index__(self, char):
+	def __charindex__(self, char):
 		"""Get the charachter index in the alphabet"""
 		try:
 			char = char.lower()
@@ -34,20 +44,31 @@ class AutoCorrect(object):
 		except:
 			return -1
 
+	def __createchar__(self, char):
+		return {
+			'char': char,
+			'children': [None] * len(self.__ALPHABET__),
+			'follows': [],
+			'is_word': False,
+			'leads': [],
+			'use_count': 0
+		}
+
 	def __traverse__(self, node=None, prefix=''):
 		"""Get all the words in the dictionary in a list"""
 		if node is None:
 			node = self.__ROOT__
 
 		collection = []
-		for node in node.children:
+		for node in node['children']:
 			if node is None:
 				continue
 
-			if node.is_word:
-				collection.append((prefix + node.char, node.use_count))
+			if node['is_word']:
+				t = get_word_tuple(node, prefix + node['char'])
+				collection.append(t)
 
-			collection += self.__traverse__(node, prefix + node.char)
+			collection += self.__traverse__(node, prefix + node['char'])
 
 		return collection
 
@@ -125,8 +146,8 @@ class AutoCorrect(object):
 		node = self.__ROOT__
 		charachters = list(prefix)
 		for character in charachters:
-			index = self.__index__(character)
-			newNode = node.children[index]
+			index = self.__charindex__(character)
+			newNode = node['children'][index]
 			if newNode is None:
 				return []
 
@@ -146,13 +167,14 @@ class AutoCorrect(object):
 		"""Find a word in the dictionary"""
 		current_node = self.__ROOT__
 		for char in word:
-			index = self.__index__(char)
-			current_node = current_node.children[index]
+			index = self.__charindex__(char)
+			current_node = current_node['children'][index]
+
 			if current_node is None:
 				raise LookupError
 
-		if current_node.is_word:
-			return (word, current_node.use_count)
+		if current_node['is_word']:
+			return get_word_tuple(current_node, word)
 		else:
 			raise LookupError
 
@@ -166,28 +188,57 @@ class AutoCorrect(object):
 	def learn_text(self, text):
 		"""Learn a set of words from a string of text"""
 		text = text.split()
-		for word in text:
-			self.learn_word(word)
 
-	def learn_word(self, word):
+		follow = None
+		word = None
+		lead = text.pop(0)
+
+		text.append(None)
+
+		for i in range(len(text)):
+			follow, word, lead = word, lead, text[i]
+			self.learn_word(word, follow, lead)
+
+	def learn_word(self, word, follows=None, leads=None):
 		"""Learn a new word to the dictionary"""
 		current_node = self.__ROOT__
 		word = word.lower()
 
 		for i in range(len(word)):
-			charachter_index = self.__index__(word[i])
+			char = word[i]
+			charachter_index = self.__charindex__(char)
+
 			if charachter_index < 0:
 				continue
 
-			if current_node.children[charachter_index] is None:
-				current_node.children[charachter_index] = CharNode(word[i], self.__ALPHABET__)
+			if current_node['children'][charachter_index] is None:
+				current_node['children'][charachter_index] = self.__createchar__(char)
 
-			current_node = current_node.children[charachter_index]
+			current_node = current_node['children'][charachter_index]
 
-		current_node.is_word = True
-		current_node.use_count += 1
+		current_node['is_word'] = True
+		current_node['use_count'] += 1
+		if not follows is None:
+			surrounding_word_tuple(current_node, follows, 'follows')
+		if not leads is None:
+			surrounding_word_tuple(current_node, leads, 'leads')
+
 
 my_dict = AutoCorrect()
+
 my_dict.learn_file('~text.txt')
-x = my_dict.find_similar_words('bbout') # Looking for 'about'
+my_dict.learn_text('hey my name is foobar')
+my_dict.learn_word('abc')
+my_dict.learn_word('abcd', 'follows')
+my_dict.learn_word('abcde', 'follows', 'leads')
+
+x = my_dict.find_word('abcde')
+print(x)
+print()
+
+x = my_dict.find_longer_words('ab')
+print(x)
+print()
+
+x = my_dict.find_similar_words('abd')
 print(x)

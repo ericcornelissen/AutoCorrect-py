@@ -42,12 +42,14 @@ Learn a set of words from a string of text.
 ##### Parameters
 | Name | Description                                     | Required |
 |------|-------------------------------------------------|----------|
-| text | The text that should be learned                 | Yes      |
+| text | The text that should be learned.                | Yes      |
 
 ### `.learn_word`
 Learn a new word given a string.
 
 ##### Parameters
-| Name | Description                                       | Required |
-|------|---------------------------------------------------|----------|
-| word | The word that should be learned by the dictionary | Yes      |
+| Name    | Description                                        | Required |
+|---------|----------------------------------------------------|----------|
+| word    | The word that should be learned by the dictionary. | Yes      |
+| follows | A word that tends to follow the given word.        | No       |
+| leads   | A word that tends to lead the given word.          | No       |
