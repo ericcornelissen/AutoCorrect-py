@@ -9,7 +9,7 @@ a simple learning-algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 07.07.2016
+Date: 08.07.2016
 """
 
 ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
@@ -36,7 +36,6 @@ class AutoCorrect(object):
 
 	def __traverse__(self, node=None, prefix=''):
 		"""Get all the words in the dictionary in a list"""
-
 		if node is None:
 			node = self.__ROOT__
 
@@ -55,7 +54,6 @@ class AutoCorrect(object):
 
 	def __bubblesearch__(self, word, position=-2):
 		"""Find variations of a word where two characters have been swapped"""
-
 		position += 2
 		word_length = len(word)
 
@@ -79,8 +77,7 @@ class AutoCorrect(object):
 		return collection
 
 	def __missingsearch__(self, word):
-		"""Find variations of a word where one letter is missing"""
-
+		"""Find variations of a word where a letter is missing"""
 		collection = []
 		prefix = ''
 		suffix = word
@@ -104,10 +101,27 @@ class AutoCorrect(object):
 
 		return collection
 
+	def __replacementsearch__(self, word):
+		"""Find variations of a word where some letters are wrong"""
+		collection = []
+
+		for i in range(len(word)):
+			word_list = list(word)
+			for letter in self.__ALPHABET__:
+				word_list[i] = letter
+				temp = ''.join(word_list)
+
+				try:
+					word_details = self.find_word(temp)
+					collection.append(word_details)
+				except:
+					pass
+
+		return collection
+
 
 	def find_longer_words(self, prefix=''):
 		"""Find words with a given prefix in the dictionary"""
-
 		node = self.__ROOT__
 		charachters = list(prefix)
 		for character in charachters:
@@ -121,9 +135,11 @@ class AutoCorrect(object):
 		return self.__traverse__(node, prefix)
 
 	def find_similar_words(self, word):
+		"""Find words similar to a given word in the dictionary"""
 		collection = []
 		collection += self.__bubblesearch__(word)
 		collection += self.__missingsearch__(word)
+		collection += self.__replacementsearch__(word)
 		return collection
 
 	def find_word(self, word):
@@ -173,5 +189,5 @@ class AutoCorrect(object):
 
 my_dict = AutoCorrect()
 my_dict.learn_file('~text.txt')
-x = my_dict.find_similar_words('aout')
+x = my_dict.find_similar_words('bbout') # Looking for 'about'
 print(x)
