@@ -167,6 +167,7 @@ class Dictionary(object):
 		collection = []
 		for word in candidates:
 			rating = 0
+
 			if not follows is None:
 				followers = word[2]
 				for follower in followers:
@@ -181,7 +182,9 @@ class Dictionary(object):
 						rating += leader[1]
 						break
 
-			collection.append((word[0], rating))
+			tup = (word[0], rating)
+			if not tup in collection:
+				collection.append(tup)
 
 		collection.sort(key=lambda tup: tup[1], reverse=True)
 		return collection
