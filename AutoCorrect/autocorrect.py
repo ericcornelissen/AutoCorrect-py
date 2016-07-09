@@ -19,7 +19,8 @@ def get_word_tuple(node, word):
 	"""Get a tuple with information about a word in the dictionary"""
 	return (word, node['use_count'], node['follows'], node['leads'])
 
-def surrounding_word_tuple(node, word, position):
+def get_surrounding_word_tuple(node, word, position):
+	"""Get a tuple for a leading or following word"""
 	append = True
 	for index, item in enumerate(node[position]):
 		if item[0] == word:
@@ -45,9 +46,11 @@ class Dictionary(object):
 			return -1
 
 	def __createchar__(self, char):
+		"""Create a character dictionary"""
 		return {
 			'char': char,
 			'children': [None] * len(self.__ALPHABET__),
+			'feedback': [],
 			'follows': [],
 			'is_word': False,
 			'leads': [],
@@ -71,6 +74,21 @@ class Dictionary(object):
 			collection += self.__traverse__(node, prefix + node['char'])
 
 		return collection
+
+	def __word__(self, word):
+		"""Find a word in the dictionary"""
+		current_node = self.__ROOT__
+		for char in word:
+			index = self.__charindex__(char)
+			current_node = current_node['children'][index]
+
+			if current_node is None:
+				raise LookupError
+
+		if current_node['is_word']:
+			return current_node
+		else:
+			raise LookupError
 
 
 	def __bubblesearch__(self, word, position=-2):
@@ -128,12 +146,13 @@ class Dictionary(object):
 
 		for i in range(len(word)):
 			word_list = list(word)
-			for letter in self.__ALPHABET__:
-				word_list[i] = letter
-				temp = ''.join(word_list)
+
+			for replacement in self.__ALPHABET__:
+				word_list[i] = replacement
+				new_word = ''.join(word_list)
 
 				try:
-					word_details = self.find_word(temp)
+					word_details = self.find_word(new_word)
 					collection.append(word_details)
 				except:
 					pass
@@ -165,24 +184,34 @@ class Dictionary(object):
 		candidates += self.__replacementsearch__(word)
 
 		collection = []
-		for word in candidates:
+		for candidate in candidates:
 			rating = 0
 
+			# Increase rating if the following words are the same
 			if not follows is None:
-				followers = word[2]
+				followers = candidate[2]
 				for follower in followers:
 					if follower[0] == follows:
 						rating += follower[1]
 						break
 
+			# Increase rating if the leading words are the same
 			if not leads is None:
-				leaders = word[3]
+				leaders = candidate[3]
 				for leader in leaders:
 					if leader[0] == leads:
 						rating += leader[1]
 						break
 
-			tup = (word[0], rating)
+			# Increase the rating if feedback has been given for a correct suggestion
+			candidate_node = self.__word__(candidate[0])
+			for string in candidate_node['feedback']:
+				if string == word:
+					rating += 3
+					break
+
+			# Create a tuple with the suggestion and rating of that suggestion
+			tup = (candidate[0], rating)
 			if not tup in collection:
 				collection.append(tup)
 
@@ -191,18 +220,8 @@ class Dictionary(object):
 
 	def find_word(self, word):
 		"""Find a word in the dictionary"""
-		current_node = self.__ROOT__
-		for char in word:
-			index = self.__charindex__(char)
-			current_node = current_node['children'][index]
-
-			if current_node is None:
-				raise LookupError
-
-		if current_node['is_word']:
-			return get_word_tuple(current_node, word)
-		else:
-			raise LookupError
+		current_node = self.__word__(word)
+		return get_word_tuple(current_node, word)
 
 
 	def get_dictionary(self):
@@ -250,6 +269,16 @@ class Dictionary(object):
 		current_node['is_word'] = True
 		current_node['use_count'] += 1
 		if not follows is None:
-			surrounding_word_tuple(current_node, follows, 'follows')
+			get_surrounding_word_tuple(current_node, follows, 'follows')
 		if not leads is None:
-			surrounding_word_tuple(current_node, leads, 'leads')
+			get_surrounding_word_tuple(current_node, leads, 'leads')
+
+
+	def suggestion_feedback(self, incorrect, suggestion):
+		"""Manual feedback on suggestions by find_similar_words"""
+		node = self.__word__(suggestion)
+
+		try:
+			node['feedback'].index(incorrect)
+		except:
+			node['feedback'].append(incorrect)

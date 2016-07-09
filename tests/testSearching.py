@@ -3,38 +3,38 @@ import AutoCorrect
 
 class testLearn(unittest.TestCase):
 	def setUp(self):
-		self.AutoCorrect = AutoCorrect.Dictionary()
+		self.Dictionary = AutoCorrect.Dictionary()
 
 	def tearDown(self):
-		self.AutoCorrect = None
+		self.Dictionary = None
 
 	# .__bubblesearch__
 	def test_bubblesearch(self):
 		"""Test to see if bubble search works as expected"""
-		self.AutoCorrect.learn_word('foobar')
+		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [])]
-		actual = self.AutoCorrect.__bubblesearch__('foboar') # Switched 'b' and 'o'
+		actual = self.Dictionary.__bubblesearch__('foboar') # Switched 'b' and 'o'
 
 		self.assertEqual(expected, actual)
 
 	# .__missingsearch__
 	def test_missingsearch(self):
 		"""Test to see if missing search works as expected"""
-		self.AutoCorrect.learn_word('foobar')
+		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [])]
-		actual = self.AutoCorrect.__missingsearch__('foobr') # Missing an 'a'
+		actual = self.Dictionary.__missingsearch__('foobr') # Missing an 'a'
 
 		self.assertEqual(expected, actual)
 
 	# .__replacementsearch__
 	def test_replacementsearch(self):
 		"""Test to see if replacement search works as expected"""
-		self.AutoCorrect.learn_word('foobar')
+		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [])]
-		actual = self.AutoCorrect.__replacementsearch__('boobar') # Replaced 'f' with 'b'
+		actual = self.Dictionary.__replacementsearch__('boobar') # Replaced 'f' with 'b'
 
 		self.assertEqual(expected, actual)
 

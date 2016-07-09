@@ -2,20 +2,31 @@
 The Dictionary class is the main class you'll be interacting with when using this Python module. A Dictionary instance
 is a special dictionary that is able to learn words and autocorrect texts using a simple learning-algorithm.
 
+To get started with this a AutoCorrect dictionary you've got to create an one, this can be done as follows.
+```python
+import AutoCorrect
+my_dictionary = AutoCorrect.dictionary()
+```
+
+##### Parameters
+| Name     | Description                                                                   | Required |
+|----------|-------------------------------------------------------------------------------|----------|
+| alphabet | The alphabet that the Dictionary uses. This is a list of possible characters. | No       |
+
 ### `.find_longer_words`
 Find all words in the AutoCorrect dictionary that start with a given prefix. If no prefix is given, all words in the
 dictionary are returned. If there are no words with a given prefix, an empty list is returned.
 
 ##### Parameters
-| Name   | Description                       | Required |
-|--------|-----------------------------------|----------|
-| prefix | The prefix words should have.     | No       |
+| Name   | Description                   | Required |
+|--------|-------------------------------|----------|
+| prefix | The prefix words should have. | No       |
 
 ### `.find_similar_words`
 Find all words in the AutoCorrect dictionary that are similar to a given word using several different algorithms.
 
-This method will return an descending (ordered on rating) list of tuples formatted as `('word', rating)`, where the
-rating is a number that indicates how likely it is that that word is the intended word.
+This method will return an descending (ordered on rating) list of suggestions formatted as a tuple `('word', rating)`,
+where the rating is a number that indicates how likely it is that that word is the intended word.
 
 ##### Parameters
 | Name    | Description                               | Required |
@@ -62,3 +73,13 @@ Learn a new word given a string.
 | word    | The word that should be learned by the dictionary. | Yes      |
 | follows | A word that tends to follow the given word.        | No       |
 | leads   | A word that tends to lead the given word.          | No       |
+
+### `.suggestion_feedback`
+Give manual feedback on the suggestions offered by the dictionary. This will increase the rating of the suggested word,
+which can be found in the dictionary, the next time the incorrect word is given to find similar words for.
+
+##### Parameters
+| Name       | Description                                             | Required |
+|------------|---------------------------------------------------------|----------|
+| incorrect  | The word for which the suggestion was offered.          | Yes      |
+| suggestion | The suggested word that can be found in the dictionary. | Yes      |
