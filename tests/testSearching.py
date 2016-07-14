@@ -13,7 +13,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if bubble search works as expected"""
 		self.Dictionary.learn_word('foobar')
 
-		expected = [('foobar', 1, [], [])]
+		expected = [('foobar', 1, [], [], [])]
 		actual = self.Dictionary.__bubblesearch__('foboar') # Switched 'b' and 'o'
 
 		self.assertEqual(expected, actual)
@@ -23,7 +23,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if missing search works as expected"""
 		self.Dictionary.learn_word('foobar')
 
-		expected = [('foobar', 1, [], [])]
+		expected = [('foobar', 1, [], [], [])]
 		actual = self.Dictionary.__missingsearch__('foobr') # Missing an 'a'
 
 		self.assertEqual(expected, actual)
@@ -33,7 +33,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if replacement search works as expected"""
 		self.Dictionary.learn_word('foobar')
 
-		expected = [('foobar', 1, [], [])]
+		expected = [('foobar', 1, [], [], [])]
 		actual = self.Dictionary.__replacementsearch__('boobar') # Replaced 'f' with 'b'
 
 		self.assertEqual(expected, actual)

@@ -13,7 +13,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if the dictionary can find a longer word"""
 		self.Dictionary.learn_text('a ab')
 
-		expected = [('ab', 1, [('a', 1)], [])]
+		expected = [('ab', 1, [('a', 1)], [], [])]
 		actual = self.Dictionary.find_longer_words('a')
 
 		self.assertEqual(expected, actual)
@@ -22,7 +22,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if the dictionary can find multiple longer words"""
 		self.Dictionary.learn_text('abc a ab')
 
-		expected = [('ab', 1, [('a', 1)], []), ('abc', 1, [], [('a', 1)])]
+		expected = [('ab', 1, [('a', 1)], [], []), ('abc', 1, [], [('a', 1)], [])]
 		actual = self.Dictionary.find_longer_words('a')
 
 		self.assertEqual(expected, actual)
@@ -69,7 +69,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if the dictionary can find a word"""
 		self.Dictionary.learn_word('foobar')
 
-		expected = ('foobar', 1, [], [])
+		expected = ('foobar', 1, [], [], [])
 		actual = self.Dictionary.find_word('foobar')
 
 		self.assertEqual(expected, actual)

@@ -13,7 +13,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if it learns one word"""
 		self.Dictionary.learn_word('foobar')
 
-		expected = [('foobar', 1, [], [])]
+		expected = [('foobar', 1, [], [], [])]
 		actual = self.Dictionary.get_dictionary()
 
 		self.assertEqual(expected, actual)
@@ -23,7 +23,7 @@ class testLearn(unittest.TestCase):
 		self.Dictionary.learn_word('foobar')
 		self.Dictionary.learn_word('foobar')
 
-		expected = [('foobar', 2, [], [])]
+		expected = [('foobar', 2, [], [], [])]
 		actual = self.Dictionary.get_dictionary()
 
 		self.assertEqual(expected, actual)
@@ -33,7 +33,7 @@ class testLearn(unittest.TestCase):
 		self.Dictionary.learn_word('foo')
 		self.Dictionary.learn_word('bar')
 
-		expected = [('bar', 1, [], []), ('foo', 1, [], [])]
+		expected = [('bar', 1, [], [], []), ('foo', 1, [], [], [])]
 		actual = self.Dictionary.get_dictionary()
 
 		self.assertEqual(expected, actual)
@@ -43,7 +43,7 @@ class testLearn(unittest.TestCase):
 		"""Test to see if it learns a small piece of text"""
 		self.Dictionary.learn_text('hello world')
 
-		expected = [('hello', 1, [], [('world', 1)]), ('world', 1, [('hello', 1)], [])]
+		expected = [('hello', 1, [], [('world', 1)], []), ('world', 1, [('hello', 1)], [], [])]
 		actual = self.Dictionary.get_dictionary()
 
 		self.assertEqual(expected, actual)

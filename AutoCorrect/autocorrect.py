@@ -9,7 +9,7 @@ simple learning algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 09.07.2016
+Date: 14.07.2016
 """
 
 ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
@@ -17,7 +17,7 @@ ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'
 
 def get_word_tuple(node, word):
 	"""Get a tuple with information about a word in the dictionary"""
-	return (word, node['use_count'], node['follows'], node['leads'])
+	return (word, node['use_count'], node['follows'], node['leads'], node['feedback'])
 
 def get_surrounding_word_tuple(node, word, position):
 	"""Get a tuple for a leading or following word"""
@@ -282,3 +282,35 @@ class Dictionary(object):
 			node['feedback'].index(incorrect)
 		except:
 			node['feedback'].append(incorrect)
+
+
+	def unlearn(self, word, feedback=None, follows=None, leads=None):
+		"""Unlearn a word or something about a word"""
+		word = self.__word__(word)
+		if not feedback is None:
+			try:
+				index = word['feedback'].index(feedback)
+				word['feedback'].pop(index)
+			except:
+				pass
+
+		if not follows is None:
+			for i in range(len(word['follows'])):
+				tup = word['follows'][i]
+				if tup[0] == follows:
+					word['follows'].pop(i)
+					break
+
+		if not leads is None:
+			for i in range(len(word['leads'])):
+				tup = word['leads'][i]
+				if tup[0] == leads:
+					word['leads'].pop(i)
+					break
+
+		if feedback is None and follows is None and leads is None:
+			word['feedback'] = []
+			word['follows'] = []
+			word['is_word'] = False
+			word['leads'] = []
+			word['use_count'] = 0

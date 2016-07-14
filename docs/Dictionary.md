@@ -83,3 +83,23 @@ which can be found in the dictionary, the next time the incorrect word is given 
 |------------|---------------------------------------------------------|----------|
 | incorrect  | The word for which the suggestion was offered.          | Yes      |
 | suggestion | The suggested word that can be found in the dictionary. | Yes      |
+
+### `.unlearn`
+Unlearn something the Dictionary knows. It is possible to unlearn a word by only providing a string of that word as the
+first argument. If you want to unlearn something about a word, you should provide it as a string for the thing you want
+to unlearn (see the details below). If the word wasn't found, a `LookupError` will be thrown.
+```python
+# To unlearn a word.
+my_dictionary.unlearn('foobar')
+
+# To unlearn something about a word.
+my_dictionary.unlearn('foo', leads='bar')
+```
+
+##### Parameters
+| Name     | Description                             | Required |
+|----------|-----------------------------------------|----------|
+| word     | The word to unlearn something about.    | Yes      |
+| feedback | A piece feedback on the word to forget. | No       |
+| follows  | A 'follows' word to forget.             | No       |
+| leads    | A 'leads' word to forget.               | No       |
