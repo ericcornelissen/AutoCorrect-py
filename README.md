@@ -22,10 +22,10 @@ my_dictionary.learn_text('Lorem ipsum dolor')
 Once that is done, you can start using the dictionary to autocorrect words.
 ```python
 # Oops, I typed 'foobar' incorrect.
-word = 'fooabr'
+mistake = 'fooabr'
 
 # Lets see if my_dictionary can correct my mistake!
-my_dictionary.find_similar_words(word)
+my_dictionary.find_similar_words(mistake)
 ```
 
 * * *

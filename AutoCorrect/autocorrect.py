@@ -206,6 +206,42 @@ class Dictionary(object):
 		return collection
 
 
+	def correct_text(self, file=None, path=None, text=None):
+		"""Automatically correct all the words in a text"""
+		if file is not None:
+			path = file.name
+
+		if path is not None:
+			f = open(path, 'r')
+			text = f.read()
+			f.close()
+
+		if text is None:
+			raise ValueError
+
+		text = text.split()
+
+		follow = None
+		word = None
+		lead = text.pop(0)
+
+		text.append(None)
+
+		for i in range(len(text)):
+			follow, word, lead = word, lead, text[i]
+			text[i] = self.correct_word(word, follow, lead)
+
+		return ' '.join(text)
+
+	def correct_word(self, word, follows=None, leads=None):
+		"""Automatically correct a word"""
+		collection = self.find_similar_words(word, follows, leads)
+		try:
+			return collection[0][0]
+		except:
+			return word
+
+
 	def export(self, file=None, path=None):
 		"""Export this AutoCorrect dictionary"""
 		if file is not None:
@@ -298,6 +334,7 @@ class Dictionary(object):
 
 		f = open(path)
 		text = f.read()
+		f.close()
 		self.learn_text(text)
 
 	def learn_text(self, text):
@@ -403,4 +440,4 @@ def Import(file=None, path=None, string=None):
 			root=insert_none(data['tree'])
 		)
 	else:
-		raise ValueError()
+		raise ValueError

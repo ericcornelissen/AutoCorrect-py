@@ -16,6 +16,36 @@ my_dictionary = AutoCorrect.Dictionary()
 
 
 ## Dictionary API
+### `.correct_text`
+Instantly correct a string of text.
+
+```python
+corrected_text = my_dictionary.correct_text('This setnence has some mitakes in it.')
+print(corrected_text) # Should be 'This sentence has some mistakes in it.'
+```
+
+#### Parameters
+| Name | Description                                                              | Required |
+|------|--------------------------------------------------------------------------|----------|
+| file | A file object with the text that should be corrected.                    | Any      |
+| path | A string of the path to the file with the text that should be corrected. | Any      |
+| text | A string of the text that should be corrected.                           | Any      |
+
+### `.correct_word`
+Instantly correct a word. This method returns the word from `.find_similar_words` with the highest rating.
+
+```python
+corrected_word = my_dictionary.correct_word('fobar')
+print(corrected_word) # Should be 'foobar'
+```
+
+#### Parameters
+| Name    | Description                        | Required |
+|---------|------------------------------------|----------|
+| word    | The word that should be corrected. | Yes      |
+| follows | The word the given word follows.   | No       |
+| leads   | The word the given word leads.     | No       |
+
 ### `.find_longer_words`
 Find all words in the AutoCorrect dictionary that start with a given prefix. If no prefix is given, all words in the
 dictionary are returned. If there are no words with a given prefix, an empty list is returned.
