@@ -16,8 +16,11 @@ import copy
 import json
 
 
-ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-import_alphabet = None
+ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', "'"]
+IMPORT_ALPHABET = None
+RATING_EQUAL = 6
+RATING_FEEDBACK = 3
+RATING_FOLLOWS_LEADS = 1
 
 
 def char_index(char, alphabet):
@@ -43,6 +46,21 @@ def get_word_tuple(node, word):
 	"""Get a tuple with information about a word in the dictionary"""
 	return (word, node['use_count'], node['follows'], node['leads'], node['feedback'])
 
+def get_string(file=None, path=None, string=None):
+	"""Get a string of text given a file or path or string"""
+	if file is not None:
+		path = file.name
+
+	if path is not None:
+		f = open(path, 'r')
+		string = f.read()
+		f.close()
+
+	if string is None:
+		raise ValueError
+
+	return string
+
 def get_surrounding_word_tuple(node, word, position):
 	"""Get a tuple for a leading or following word"""
 	append = True
@@ -57,7 +75,7 @@ def get_surrounding_word_tuple(node, word, position):
 
 def insert_none(node):
 	"""Re-add None values to an imported Dictionary"""
-	global import_alphabet
+	global IMPORT_ALPHABET
 
 	children = node['children']
 	last_index = 0
@@ -66,11 +84,11 @@ def insert_none(node):
 	for child in children:
 		insert_none(child)
 
-		index = char_index(child['char'], import_alphabet)
+		index = char_index(child['char'], IMPORT_ALPHABET)
 		none_ranges.append((last_index, index))
 		last_index = index + 1
 
-	none_ranges.append((last_index, len(import_alphabet)))
+	none_ranges.append((last_index, len(IMPORT_ALPHABET)))
 	for tup in none_ranges:
 		for i in range(tup[0], tup[1]):
 			children.insert(i, None)
@@ -94,7 +112,7 @@ class Dictionary(object):
 	def __createchar__(self, char):
 		"""Create a character dictionary"""
 		return {
-			'char': char,
+			'char': char.lower(),
 			'children': [None] * len(self.__ALPHABET__),
 			'feedback': [],
 			'follows': [],
@@ -207,29 +225,28 @@ class Dictionary(object):
 
 
 	def correct_text(self, file=None, path=None, text=None):
-		"""Automatically correct all the words in a text"""
-		if file is not None:
-			path = file.name
-
-		if path is not None:
-			f = open(path, 'r')
-			text = f.read()
-			f.close()
-
-		if text is None:
-			raise ValueError
-
-		text = text.split()
+		"""Automatically correct all the words in a piece of text"""
+		text = get_string(file, path, text).split()
+		text.append(None)
 
 		follow = None
 		word = None
 		lead = text.pop(0)
 
-		text.append(None)
-
 		for i in range(len(text)):
 			follow, word, lead = word, lead, text[i]
-			text[i] = self.correct_word(word, follow, lead)
+
+			prefix = ''
+			while self.__charindex__(word[0]) < 0:
+				prefix = word[0]
+				word = word[1:]
+
+			suffix = ''
+			while self.__charindex__(word[-1:]) < 0:
+				suffix += word[-1:]
+				word = word[:-1]
+
+			text[i] = prefix + self.correct_word(word, follow, lead) + suffix
 
 		return ' '.join(text)
 
@@ -285,12 +302,16 @@ class Dictionary(object):
 		for candidate in candidates:
 			rating = 0
 
+			# Increase the rating if the candiate word is the actual word
+			if candidate[0] == word:
+				rating += RATING_EQUAL
+
 			# Increase rating if the following words are the same
 			if follows is not None:
 				followers = candidate[2]
 				for follower in followers:
 					if follower[0] == follows:
-						rating += follower[1]
+						rating += RATING_FOLLOWS_LEADS
 						break
 
 			# Increase rating if the leading words are the same
@@ -298,14 +319,14 @@ class Dictionary(object):
 				leaders = candidate[3]
 				for leader in leaders:
 					if leader[0] == leads:
-						rating += leader[1]
+						rating += RATING_FOLLOWS_LEADS
 						break
 
 			# Increase the rating if feedback has been given for a correct suggestion
 			candidate_node = self.__word__(candidate[0])
 			for string in candidate_node['feedback']:
 				if string == word:
-					rating += 3
+					rating += RATING_FEEDBACK
 					break
 
 			# Create a tuple with the suggestion and rating of that suggestion
@@ -340,12 +361,11 @@ class Dictionary(object):
 	def learn_text(self, text):
 		"""Learn a set of words from a string of text"""
 		text = text.split()
+		text.append(None)
 
 		follow = None
 		word = None
 		lead = text.pop(0)
-
-		text.append(None)
 
 		for i in range(len(text)):
 			follow, word, lead = word, lead, text[i]
@@ -421,23 +441,13 @@ class Dictionary(object):
 
 def Import(file=None, path=None, string=None):
 	"""Import an AutoCorrect Dictionary"""
-	global import_alphabet
+	string = get_string(file, path, string)
+	data = json.loads(string)
 
-	if file is not None:
-		path = file.name
+	global IMPORT_ALPHABET
+	IMPORT_ALPHABET = data['alphabet']
 
-	if path is not None:
-		f = open(path, 'r')
-		string = f.read()
-		f.close()
-
-	if string is not None:
-		data = json.loads(string)
-		import_alphabet = data['alphabet']
-
-		return Dictionary(
-			alphabet=data['alphabet'],
-			root=insert_none(data['tree'])
-		)
-	else:
-		raise ValueError
+	return Dictionary(
+		alphabet=data['alphabet'],
+		root=insert_none(data['tree'])
+	)

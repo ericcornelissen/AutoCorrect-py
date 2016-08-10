@@ -19,8 +19,8 @@ class testCorrect(unittest.TestCase):
 
 	def test_correct_text(self):
 		"""Test to see if the dictionary correctly corrects a string of text"""
-		expected = 'this sentence has some mistakes in it.'
+		expected = 'This sentence has some mistakes in it.'
 		self.Dictionary.learn_text(expected)
 
-		actual = self.Dictionary.correct_text(text='this setnence has some mitakes in it.')
+		actual = self.Dictionary.correct_text(text='Tis setnence has some mitakes in i.')
 		self.assertEqual(expected, actual)

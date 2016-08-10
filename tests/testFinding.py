@@ -64,6 +64,15 @@ class testLearn(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 
+	def test_find_similar_word_same_word(self):
+		"""Test to see if the dictionary can find a similar word"""
+		self.Dictionary.learn_word('foobar')
+
+		expected = [('foobar', 6)]
+		actual = self.Dictionary.find_similar_words('foobar')
+
+		self.assertEqual(expected, actual)
+
 	# .find_word
 	def test_find_word(self):
 		"""Test to see if the dictionary can find a word"""
