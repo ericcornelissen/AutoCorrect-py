@@ -291,9 +291,12 @@ class Dictionary(object):
 		return self.__traverse__()
 
 
-	def learn_file(self, file):
+	def learn_file(self, file=None, path=None):
 		"""Learn a set of words from a file"""
-		f = open(file)
+		if file is not None:
+			path = file.name
+
+		f = open(path)
 		text = f.read()
 		self.learn_text(text)
 

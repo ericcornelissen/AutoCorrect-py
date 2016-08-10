@@ -12,7 +12,7 @@ with open('LICENSE') as f:
 
 setup(
     name='AutoCorrect',
-    version='0.1.1',
+    version='0.1.2',
     description='A simple learning dictionary to autocorrect texts',
     long_description=readme,
     author='Eric Cornelissen',

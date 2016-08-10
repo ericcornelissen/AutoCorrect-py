@@ -12,7 +12,7 @@ my_dictionary = AutoCorrect.Dictionary()
 #### Parameters
 | Name     | Description                                                                   | Required |
 |----------|-------------------------------------------------------------------------------|----------|
-| alphabet | The alphabet that the Dictionary uses. This is a list of possible characters. | No       |
+| alphabet | The alphabet that the Dictionary uses, this is a list of possible characters. | No       |
 
 
 ## Dictionary API
@@ -49,7 +49,7 @@ print(suggestions) # Should suggest 'foobar'
 | leads   | The word the given word leads.            | No       |
 
 ### `.find_word`
-Find a word in the AutoCorrect dictionary. A tuple containing information about that word is returned if the word is
+Find a word in the AutoCorrect dictionary. Information about the word is returned in the form of a tuple if the word is
 found. Otherwise, if the word wasn't found, a `LookupError` will be thrown.
 
 ```python
@@ -58,9 +58,9 @@ print(word) # information about the 'foobar' (if found)
 ```
 
 #### Parameters
-| Name | Description                       | Required |
-|------|-----------------------------------|----------|
-| word | The word you want to find.        | Yes      |
+| Name | Description                | Required |
+|------|----------------------------|----------|
+| word | The word you want to find. | Yes      |
 
 ### `.get_dictionary`
 Get a list of all words in the dictionary. The list contains a tuple for each word with some useful information about
@@ -76,13 +76,14 @@ Learn a set of words from a piece of text in a file. If the file is found, all w
 by the dictionary. Otherwise, if the file wasn't found, a `FileNotFoundError`  will be thrown.
 
 ```python
-my_dictionary.learn_file('foobar.txt')
+my_dictionary.learn_file(path='foobar.txt')
 ```
 
 #### Parameters
-| Name | Description                                          | Required |
-|------|------------------------------------------------------|----------|
-| file | The file containing the text that should be learned. | Yes      |
+| Name | Description                                              | Required |
+|------|----------------------------------------------------------|----------|
+| file | The file object of the file that should be learned.      | Any      |
+| path | A string of the path to the file that should be learned. | Any      |
 
 ### `.learn_text`
 Learn a set of words from a string of text.
