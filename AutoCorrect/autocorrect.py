@@ -9,11 +9,35 @@ simple learning algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 14.07.2016
+Date: 10.08.2016
 """
 
-ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+import copy
+import json
 
+
+ALPHABET = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+import_alphabet = None
+
+
+def char_index(char, alphabet):
+	"""Get the index of a character in an alphabet"""
+	try:
+		char = char.lower()
+		return alphabet.index(char)
+	except:
+		return -1
+
+def exclude_none(node):
+	"""Remove None values from a Dictionary for exporting"""
+	l = node['children']
+	for i in range(len(l) - 1, -1, -1):
+		if l[i] is None:
+			del l[i]
+		else:
+			exclude_none(l[i])
+
+	return node
 
 def get_word_tuple(node, word):
 	"""Get a tuple with information about a word in the dictionary"""
@@ -31,19 +55,41 @@ def get_surrounding_word_tuple(node, word, position):
 	if append:
 		node[position].append((word, 1))
 
+def insert_none(node):
+	"""Re-add None values to an imported Dictionary"""
+	global import_alphabet
+
+	children = node['children']
+	last_index = 0
+	none_ranges = []
+
+	for child in children:
+		insert_none(child)
+
+		index = char_index(child['char'], import_alphabet)
+		none_ranges.append((last_index, index))
+		last_index = index + 1
+
+	none_ranges.append((last_index, len(import_alphabet)))
+	for tup in none_ranges:
+		for i in range(tup[0], tup[1]):
+			children.insert(i, None)
+
+	return node
+
 
 class Dictionary(object):
-	def __init__(self, alphabet=ALPHABET):
+	def __init__(self, alphabet=ALPHABET, root=None):
 		self.__ALPHABET__ = alphabet
-		self.__ROOT__ = self.__createchar__('root')
+
+		if root is None:
+			self.__ROOT__ = self.__createchar__('root')
+		else:
+			self.__ROOT__ = root
 
 	def __charindex__(self, char):
 		"""Get the charachter index in the alphabet"""
-		try:
-			char = char.lower()
-			return self.__ALPHABET__.index(char)
-		except:
-			return -1
+		return char_index(char, self.__ALPHABET__)
 
 	def __createchar__(self, char):
 		"""Create a character dictionary"""
@@ -160,6 +206,22 @@ class Dictionary(object):
 		return collection
 
 
+	def export(self, file=None, path=None):
+		"""Export this AutoCorrect dictionary"""
+		if file is not None:
+			path = file.name
+
+		root = copy.deepcopy(self.__ROOT__)
+		export_data = json.dumps({'tree': exclude_none(root), 'alphabet': self.__ALPHABET__})
+
+		if path is not None:
+			f = open(path, 'w')
+			f.write(export_data)
+			f.close()
+		else:
+			return export_data
+
+
 	def find_longer_words(self, prefix=''):
 		"""Find words with a given prefix in the dictionary"""
 		node = self.__ROOT__
@@ -188,7 +250,7 @@ class Dictionary(object):
 			rating = 0
 
 			# Increase rating if the following words are the same
-			if not follows is None:
+			if follows is not None:
 				followers = candidate[2]
 				for follower in followers:
 					if follower[0] == follows:
@@ -196,7 +258,7 @@ class Dictionary(object):
 						break
 
 			# Increase rating if the leading words are the same
-			if not leads is None:
+			if leads is not None:
 				leaders = candidate[3]
 				for leader in leaders:
 					if leader[0] == leads:
@@ -268,9 +330,10 @@ class Dictionary(object):
 
 		current_node['is_word'] = True
 		current_node['use_count'] += 1
-		if not follows is None:
+
+		if follows is not None:
 			get_surrounding_word_tuple(current_node, follows, 'follows')
-		if not leads is None:
+		if leads is not None:
 			get_surrounding_word_tuple(current_node, leads, 'leads')
 
 
@@ -287,21 +350,21 @@ class Dictionary(object):
 	def unlearn(self, word, feedback=None, follows=None, leads=None):
 		"""Unlearn a word or something about a word"""
 		word = self.__word__(word)
-		if not feedback is None:
+		if feedback is not None:
 			try:
 				index = word['feedback'].index(feedback)
 				word['feedback'].pop(index)
 			except:
 				pass
 
-		if not follows is None:
+		if follows is not None:
 			for i in range(len(word['follows'])):
 				tup = word['follows'][i]
 				if tup[0] == follows:
 					word['follows'].pop(i)
 					break
 
-		if not leads is None:
+		if leads is not None:
 			for i in range(len(word['leads'])):
 				tup = word['leads'][i]
 				if tup[0] == leads:
@@ -314,3 +377,27 @@ class Dictionary(object):
 			word['is_word'] = False
 			word['leads'] = []
 			word['use_count'] = 0
+
+
+def Import(file=None, path=None, string=None):
+	"""Import an AutoCorrect Dictionary"""
+	global import_alphabet
+
+	if file is not None:
+		path = file.name
+
+	if path is not None:
+		f = open(path, 'r')
+		string = f.read()
+		f.close()
+
+	if string is not None:
+		data = json.loads(string)
+		import_alphabet = data['alphabet']
+
+		return Dictionary(
+			alphabet=data['alphabet'],
+			root=insert_none(data['tree'])
+		)
+	else:
+		raise ValueError()
