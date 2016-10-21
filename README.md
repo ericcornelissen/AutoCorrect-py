@@ -1,5 +1,5 @@
 # AutoCorrect
-A Python module that provides a dictionary and a simple learning algorithm to autocorrect texts.
+A Python module that provides a dictionary and a simple learning algorithm to autocorrect words & texts.
 
 * * *
 
@@ -7,7 +7,7 @@ A Python module that provides a dictionary and a simple learning algorithm to au
 To get started with this module you've got to create an AutoCorrect dictionary.
 ```python
 import AutoCorrect
-my_dictionary = AutoCorrect.dictionary()
+my_dictionary = AutoCorrect.Dictionary()
 ```
 
 The first thing to do with a dictionary is learn it some words.

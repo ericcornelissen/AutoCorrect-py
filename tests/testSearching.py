@@ -38,5 +38,17 @@ class testLearn(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 
+	# .__spacesearch__
+	def test_spacesearch(self):
+		"""Test to see if space search works as expected"""
+		self.Dictionary.learn_text('foo bar')
+
+		expected = [('foo bar', 1, [], [], [])]
+		actual = self.Dictionary.__spacesearch__('foobar')
+
+		self.assertEqual(expected, actual)
+
+
+
 if __name__ == "__main__":
 	unittest.main()

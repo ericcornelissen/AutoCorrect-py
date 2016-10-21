@@ -9,7 +9,7 @@ simple learning algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 10.08.2016
+Date: 21.10.2016
 """
 
 import copy
@@ -223,6 +223,35 @@ class Dictionary(object):
 
 		return collection
 
+	def __spacesearch__(self, word):
+		"""Find words that appear when the word is split in two"""
+		collection = []
+
+		word_list = list(word)
+		for i in range(len(word)):
+			word_1 = ''.join(word_list[:i])
+			word_2 = ''.join(word_list[i:])
+
+			try:
+				word_1_details = self.find_word(word_1)
+				word_2_details = self.find_word(word_2)
+
+				node = self.__createchar__('a')
+
+				for x in word_1_details[3]:
+					if x[0] == word_2:
+						node['use_count'] = x[1]
+
+				node['follows'] = word_1_details[2]
+				node['leads'] = word_2_details[3]
+
+				res = get_word_tuple(node, word_1 + ' ' + word_2)
+				collection.append(res)
+			except:
+				pass
+
+		return collection
+
 
 	def correct_text(self, file=None, path=None, text=None):
 		"""Automatically correct all the words in a piece of text"""
@@ -297,6 +326,7 @@ class Dictionary(object):
 		candidates += self.__bubblesearch__(word)
 		candidates += self.__missingsearch__(word)
 		candidates += self.__replacementsearch__(word)
+		candidates += self.__spacesearch__(word)
 
 		collection = []
 		for candidate in candidates:
@@ -323,11 +353,14 @@ class Dictionary(object):
 						break
 
 			# Increase the rating if feedback has been given for a correct suggestion
-			candidate_node = self.__word__(candidate[0])
-			for string in candidate_node['feedback']:
-				if string == word:
-					rating += RATING_FEEDBACK
-					break
+			try:
+				candidate_node = self.__word__(candidate[0])
+				for string in candidate_node['feedback']:
+					if string == word:
+						rating += RATING_FEEDBACK
+						break
+			except LookupError:
+				pass
 
 			# Create a tuple with the suggestion and rating of that suggestion
 			tup = (candidate[0], rating)
