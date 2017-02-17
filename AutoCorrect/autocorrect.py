@@ -155,27 +155,36 @@ class Dictionary(object):
 			raise LookupError
 
 
-	def __bubblesearch__(self, word, position=-2):
+	def __bubblesearch__(self, word, position=0, node=None):
 		"""Find variations of a word where two characters have been swapped"""
-		position += 2
-		word_length = len(word)
-
-		if position > word_length:
-			return []
+		if node == None:
+			node = self.__ROOT__
 
 		collection = []
-		for i in range(position, word_length - 1):
-			temp = list(word)
-			temp[i], temp[i + 1] = temp[i + 1], temp[i]
-			temp = ''.join(temp)
+		for i in range(position, len(word)):
+			# Search for words that have swapped letters at index i
+			if i < len(word) - 1:
+				# Find a node for the next character (i + 1) as a child of the current node
+				index = char_index(word[i + 1], self.__ALPHABET__)
+				swap_node = node['children'][index]
+				if swap_node != None:
+					# Create a new string where the two letters are swapped
+					temp = list(word)
+					temp[i], temp[i + 1] = temp[i + 1], temp[i]
+					temp = ''.join(temp)
 
-			try:
-				word_details = self.find_word(temp)
-				collection.append(word_details)
-			except:
-				pass
+					# Search the dictionary with the swapped letters from the swapped node
+					collection += self.__bubblesearch__(temp, i + 1, swap_node)
 
-			collection += self.__bubblesearch__(temp, position + i)
+			# Continue searching with the next node (w/o a swap) in the word
+			index = char_index(word[i], self.__ALPHABET__)
+			node = node['children'][index]
+			if node == None:
+				break
+
+		if node != None and node['is_word']:
+			word_details = get_word_tuple(node, word)
+			collection.append(word_details)
 
 		return collection
 
@@ -372,8 +381,8 @@ class Dictionary(object):
 
 	def find_word(self, word):
 		"""Find a word in the dictionary"""
-		current_node = self.__word__(word)
-		return get_word_tuple(current_node, word)
+		node = self.__word__(word)
+		return get_word_tuple(node, word)
 
 
 	def get_dictionary(self):

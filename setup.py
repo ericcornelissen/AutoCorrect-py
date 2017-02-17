@@ -12,8 +12,8 @@ with open('LICENSE') as f:
 
 setup(
     name='AutoCorrect',
-    version='0.1.2',
-    description='A simple learning dictionary to autocorrect texts',
+    version='0.1.3',
+    description='A simple self-learning dictionary to autocorrect texts',
     long_description=readme,
     author='Eric Cornelissen',
     author_email='ericornelissen@gmail.com',
