@@ -1,4 +1,6 @@
-# Ignore Python generated paths
+*.pyc
+
+# ignore Python generated paths
 __pycache__
 AutoCorrect.egg-info
 build

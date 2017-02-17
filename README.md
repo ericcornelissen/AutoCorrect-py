@@ -30,14 +30,8 @@ my_dictionary.find_similar_words(mistake)
 
 * * *
 
-## Tests
-In order to run the unittests for this module, it is required that you install it as a package. This can be done by
-running the following command from the root of the project.
-```
-$ python setup.py install
-```
-
-Once that is done, all tests can be run using the command:
+## Testing
+In order to run the tests for this module use the command:
 ```
 $ python -m unittest discover
 ```
