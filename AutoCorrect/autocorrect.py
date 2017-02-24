@@ -9,7 +9,7 @@ simple learning algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 21.10.2016
+Date: 24.02.2017
 """
 
 import copy
@@ -44,7 +44,13 @@ def exclude_none(node):
 
 def get_word_tuple(node, word):
 	"""Get a tuple with information about a word in the dictionary"""
-	return (word, node['use_count'], node['follows'], node['leads'], node['feedback'])
+	return (
+		word,
+		node['use_count'],
+		node['follows'],
+		node['leads'],
+		node['feedback']
+	)
 
 def get_string(file=None, path=None, string=None):
 	"""Get a string of text given a file or path or string"""
@@ -159,66 +165,58 @@ class Dictionary(object):
 			raise LookupError
 
 
-	def __bubblesearch__(self, word, node=None, position=0):
+	def __bubblesearch__(self, word, node, position=0):
 		"""Find variations of a word where two characters have been swapped"""
-		if node == None:
-			node = self.__ROOT__
-
+		i = 0
 		collection = []
-		for i in range(position, len(word)):
-			# Search for words that have swapped letters at index i and i + 1
-			if i < len(word) - 1:
-				# Find a node for the next character (i + 1) as a child of the current node
-				swap_node = self.__getnode__(node, word[i + 1])
-				if swap_node is not None:
-					# Create a new string where the two letters are swapped
-					temp = list(word)
-					temp[i], temp[i + 1] = temp[i + 1], temp[i]
-					temp = ''.join(temp)
+		for i in range(position, len(word) - 1):
+			# Find out if the current node has the next-next characters as child
+			swap_node = self.__getnode__(node, word[i + 1])
+			if swap_node is not None:
+				# Create a string of the word with the two letters swapped
+				temp = list(word)
+				temp[i], temp[i + 1] = temp[i + 1], temp[i]
+				temp = ''.join(temp)
 
-					# Search the dictionary with the swapped letters from the swapped node
-					collection += self.__bubblesearch__(temp, swap_node, i + 1)
+				# Recursivly call BubbleSearch for more results
+				collection += self.__bubblesearch__(temp, swap_node, i + 1)
 
-			# Continue searching with the next node (w/o a swap) in the word
 			node = self.__getnode__(node, word[i])
-			if node == None:
-				break
+			if node is None:
+				# Early out when the end of the word isn't reached
+				return collection
 
-		if node != None and node['is_word']:
+		# Check if an exising word is created by adding the last character
+		node = self.__getnode__(node, word[-1])
+		if node is not None and node['is_word']:
 			word_details = get_word_tuple(node, word)
 			collection.append(word_details)
 
 		return collection
 
-	def __missingsearch__(self, word, node=None):
+	def __missingsearch__(self, word, node):
 		"""Find variations of a word where a letter is missing"""
-		if node == None:
-			node = self.__ROOT__
-
 		collection = []
 		for i in range(len(word) + 1):
-			# Try to insert all possible letter at the current position in the word.
 			for insert_node in node['children']:
 				if insert_node is not None:
-					# Construct the final word with the letter currently being inserted
+					# Construct a string of the word with inserted letter
 					insert_word = word[0:i] + insert_node['char'] + word[i:]
 
-					# Try to complete the word in the dictionary tree with the inserted letter
+					# Trye to complete the word in the Dictionary tree
 					for j in range(i, len(word)):
 						insert_node = self.__getnode__(insert_node, word[j])
 						if insert_node is None:
 							break
 
-					# Add the word with the inserted letter to the collection of corrected words
-					if insert_node != None and insert_node['is_word']:
+					# Remember the word that was found by the insertion
+					if insert_node is not None and insert_node['is_word']:
 						word_details = get_word_tuple(insert_node, insert_word)
 						collection.append(word_details)
 
-			# Stop searching if the word length is exceeded
-			if i >= len(word):
+			if i >= len(word): # needed because for-loop extends the word length
 				break
 
-			# Get the next node based the current letter in the word
 			node = self.__getnode__(node, word[i])
 			if node is None:
 				break
@@ -275,7 +273,7 @@ class Dictionary(object):
 
 
 	def correct_text(self, file=None, path=None, text=None):
-		"""Automatically correct all the words in a piece of text"""
+		"""Automatically correct all the words in a text"""
 		text = get_string(file, path, text).split()
 		text.append(None)
 
@@ -315,7 +313,10 @@ class Dictionary(object):
 			path = file.name
 
 		root = copy.deepcopy(self.__ROOT__)
-		export_data = json.dumps({'tree': exclude_none(root), 'alphabet': self.__ALPHABET__})
+		export_data = json.dumps({
+			'tree': exclude_none(root),
+			'alphabet': self.__ALPHABET__
+		})
 
 		if path is not None:
 			f = open(path, 'w')
@@ -344,8 +345,8 @@ class Dictionary(object):
 	def find_similar_words(self, word, follows=None, leads=None):
 		"""Find words similar to a given word in the dictionary"""
 		candidates = []
-		candidates += self.__bubblesearch__(word)
-		candidates += self.__missingsearch__(word)
+		candidates += self.__bubblesearch__(word, self.__ROOT__)
+		candidates += self.__missingsearch__(word, self.__ROOT__)
 		candidates += self.__replacementsearch__(word)
 		candidates += self.__spacesearch__(word)
 
@@ -373,7 +374,7 @@ class Dictionary(object):
 						rating += RATING_FOLLOWS_LEADS
 						break
 
-			# Increase the rating if feedback has been given for a correct suggestion
+			# Increase rating based on manual feedback
 			try:
 				candidate_node = self.__word__(candidate[0])
 				for string in candidate_node['feedback']:
@@ -438,7 +439,8 @@ class Dictionary(object):
 				continue
 
 			if current_node['children'][charachter_index] is None:
-				current_node['children'][charachter_index] = self.__createchar__(char)
+				node = self.__createchar__(char)
+				current_node['children'][charachter_index] = node
 
 			current_node = current_node['children'][charachter_index]
 
@@ -452,7 +454,7 @@ class Dictionary(object):
 
 
 	def suggestion_feedback(self, incorrect, suggestion):
-		"""Manual feedback on suggestions by find_similar_words"""
+		"""Provide manual feedback on suggestions by the Dictionary"""
 		node = self.__word__(suggestion)
 
 		try:
@@ -501,7 +503,4 @@ def Import(file=None, path=None, string=None):
 	global IMPORT_ALPHABET
 	IMPORT_ALPHABET = data['alphabet']
 
-	return Dictionary(
-		alphabet=data['alphabet'],
-		root=insert_none(data['tree'])
-	)
+	return Dictionary(alphabet=data['alphabet'], root=insert_none(data['tree']))

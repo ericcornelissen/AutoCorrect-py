@@ -4,9 +4,11 @@ import AutoCorrect
 class testLearn(unittest.TestCase):
 	def setUp(self):
 		self.Dictionary = AutoCorrect.Dictionary()
+		self.Root = self.Dictionary.__ROOT__
 
 	def tearDown(self):
 		self.Dictionary = None
+		self.Root = None
 
 	# .__bubblesearch__
 	def test_bubblesearch(self):
@@ -14,7 +16,7 @@ class testLearn(unittest.TestCase):
 		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [], [])]
-		actual = self.Dictionary.__bubblesearch__('foboar') # Switched 'b' and 'o'
+		actual = self.Dictionary.__bubblesearch__('foboar', self.Root) # Switched 'b' and 'o'
 
 		self.assertEqual(expected, actual)
 
@@ -24,7 +26,7 @@ class testLearn(unittest.TestCase):
 		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [], [])]
-		actual = self.Dictionary.__missingsearch__('foobr') # Missing an 'a'
+		actual = self.Dictionary.__missingsearch__('foobr', self.Root) # Missing an 'a'
 
 		self.assertEqual(expected, actual)
 
