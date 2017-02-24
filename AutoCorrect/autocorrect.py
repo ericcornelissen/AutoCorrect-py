@@ -101,6 +101,11 @@ def insert_none(node):
 
 	return node
 
+def remove_duplicates(original_list):
+	# Thanks to cchristelis (http://stackoverflow.com/a/24085464)
+	unique_list = []
+	[unique_list.append(obj) for obj in original_list if obj not in unique_list]
+	return unique_list
 
 class Dictionary(object):
 	def __init__(self, alphabet=ALPHABET, root=None):
@@ -192,16 +197,22 @@ class Dictionary(object):
 			word_details = get_word_tuple(node, word)
 			collection.append(word_details)
 
-		return collection
+		return remove_duplicates(collection)
 
-	def __missingsearch__(self, word, node):
+	def __missingsearch__(self, word, depth=0):
 		"""Find variations of a word where a letter is missing"""
+		if depth >= 3:
+			return []
+
+		node = self.__ROOT__
 		collection = []
 		for i in range(len(word) + 1):
 			for insert_node in node['children']:
 				if insert_node is not None:
 					# Construct a string of the word with inserted letter
 					insert_word = word[0:i] + insert_node['char'] + word[i:]
+
+					collection += self.__missingsearch__(insert_word, depth + 1)
 
 					# Trye to complete the word in the Dictionary tree
 					for j in range(i, len(word)):
@@ -221,7 +232,7 @@ class Dictionary(object):
 			if node is None:
 				break
 
-		return collection
+		return remove_duplicates(collection)
 
 	def __replacementsearch__(self, word):
 		"""Find variations of a word where some letters are wrong"""
@@ -240,7 +251,7 @@ class Dictionary(object):
 				except:
 					pass
 
-		return collection
+		return remove_duplicates(collection)
 
 	def __spacesearch__(self, word):
 		"""Find words that appear when the word is split in two"""
@@ -269,7 +280,7 @@ class Dictionary(object):
 			except:
 				pass
 
-		return collection
+		return remove_duplicates(collection)
 
 
 	def correct_text(self, text=None, file=None, path=None):
@@ -346,7 +357,7 @@ class Dictionary(object):
 		"""Find words similar to a given word in the dictionary"""
 		candidates = []
 		candidates += self.__bubblesearch__(word, self.__ROOT__)
-		candidates += self.__missingsearch__(word, self.__ROOT__)
+		candidates += self.__missingsearch__(word)
 		candidates += self.__replacementsearch__(word)
 		candidates += self.__spacesearch__(word)
 
