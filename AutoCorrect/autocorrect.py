@@ -272,7 +272,7 @@ class Dictionary(object):
 		return collection
 
 
-	def correct_text(self, file=None, path=None, text=None):
+	def correct_text(self, text=None, file=None, path=None):
 		"""Automatically correct all the words in a text"""
 		text = get_string(file, path, text).split()
 		text.append(None)
@@ -403,19 +403,9 @@ class Dictionary(object):
 		return self.__traverse__()
 
 
-	def learn_file(self, file=None, path=None):
-		"""Learn a set of words from a file"""
-		if file is not None:
-			path = file.name
-
-		f = open(path)
-		text = f.read()
-		f.close()
-		self.learn_text(text)
-
-	def learn_text(self, text):
-		"""Learn a set of words from a string of text"""
-		text = text.split()
+	def learn_text(self, text=None, file=None, path=None):
+		"""Learn all words from a string of text"""
+		text = get_string(file, path, text).split()
 		text.append(None)
 
 		follow = None
