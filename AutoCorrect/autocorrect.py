@@ -121,6 +121,10 @@ class Dictionary(object):
 			'use_count': 0
 		}
 
+	def __getnode__(self, node, char):
+		index = self.__charindex__(char)
+		return node['children'][index]
+
 	def __traverse__(self, node=None, prefix=''):
 		"""Get all the words in the dictionary in a list"""
 		if node is None:
@@ -155,30 +159,28 @@ class Dictionary(object):
 			raise LookupError
 
 
-	def __bubblesearch__(self, word, position=0, node=None):
+	def __bubblesearch__(self, word, node=None, position=0):
 		"""Find variations of a word where two characters have been swapped"""
 		if node == None:
 			node = self.__ROOT__
 
 		collection = []
 		for i in range(position, len(word)):
-			# Search for words that have swapped letters at index i
+			# Search for words that have swapped letters at index i and i + 1
 			if i < len(word) - 1:
 				# Find a node for the next character (i + 1) as a child of the current node
-				index = char_index(word[i + 1], self.__ALPHABET__)
-				swap_node = node['children'][index]
-				if swap_node != None:
+				swap_node = self.__getnode__(node, word[i + 1])
+				if swap_node is not None:
 					# Create a new string where the two letters are swapped
 					temp = list(word)
 					temp[i], temp[i + 1] = temp[i + 1], temp[i]
 					temp = ''.join(temp)
 
 					# Search the dictionary with the swapped letters from the swapped node
-					collection += self.__bubblesearch__(temp, i + 1, swap_node)
+					collection += self.__bubblesearch__(temp, swap_node, i + 1)
 
 			# Continue searching with the next node (w/o a swap) in the word
-			index = char_index(word[i], self.__ALPHABET__)
-			node = node['children'][index]
+			node = self.__getnode__(node, word[i])
 			if node == None:
 				break
 
@@ -188,28 +190,38 @@ class Dictionary(object):
 
 		return collection
 
-	def __missingsearch__(self, word):
+	def __missingsearch__(self, word, node=None):
 		"""Find variations of a word where a letter is missing"""
+		if node == None:
+			node = self.__ROOT__
+
 		collection = []
-		prefix = ''
-		suffix = word
-
 		for i in range(len(word) + 1):
-			for letter in self.__ALPHABET__:
-				word = prefix + letter + suffix
+			# Try to insert all possible letter at the current position in the word.
+			for insert_node in node['children']:
+				if insert_node is not None:
+					# Construct the final word with the letter currently being inserted
+					insert_word = word[0:i] + insert_node['char'] + word[i:]
 
-				try:
-					word_details = self.find_word(word)
-					collection.append(word_details)
-				except:
-					pass
+					# Try to complete the word in the dictionary tree with the inserted letter
+					for j in range(i, len(word)):
+						insert_node = self.__getnode__(insert_node, word[j])
+						if insert_node is None:
+							break
 
-			# Move the prefix and suffix
-			try:
-				prefix += suffix[0]
-				suffix = suffix[1:]
-			except:
-				pass
+					# Add the word with the inserted letter to the collection of corrected words
+					if insert_node != None and insert_node['is_word']:
+						word_details = get_word_tuple(insert_node, insert_word)
+						collection.append(word_details)
+
+			# Stop searching if the word length is exceeded
+			if i >= len(word):
+				break
+
+			# Get the next node based the current letter in the word
+			node = self.__getnode__(node, word[i])
+			if node is None:
+				break
 
 		return collection
 
