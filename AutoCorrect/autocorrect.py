@@ -9,7 +9,7 @@ simple learning algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 24.02.2017
+Date: 25.02.2017
 """
 
 import copy
@@ -199,22 +199,27 @@ class Dictionary(object):
 
 		return remove_duplicates(collection)
 
-	def __missingsearch__(self, word, depth=0):
+	def __insertionsearch__(self, word, node, position=0, depth=0):
 		"""Find variations of a word where a letter is missing"""
-		if depth >= 3:
+		if depth >= (.25 * len(word)):
 			return []
 
-		node = self.__ROOT__
 		collection = []
-		for i in range(len(word) + 1):
+		for i in range(position, len(word) + 1):
 			for insert_node in node['children']:
 				if insert_node is not None:
 					# Construct a string of the word with inserted letter
-					insert_word = word[0:i] + insert_node['char'] + word[i:]
+					alt_word = word[0:i] + insert_node['char'] + word[i:]
 
-					collection += self.__missingsearch__(insert_word, depth + 1)
+					# Extend the collection with a recursive call
+					collection += self.__insertionsearch__(
+						alt_word,
+						insert_node,
+						i + 1,
+						depth + 1
+					)
 
-					# Trye to complete the word in the Dictionary tree
+					# Try to complete the word in the Dictionary tree
 					for j in range(i, len(word)):
 						insert_node = self.__getnode__(insert_node, word[j])
 						if insert_node is None:
@@ -222,7 +227,7 @@ class Dictionary(object):
 
 					# Remember the word that was found by the insertion
 					if insert_node is not None and insert_node['is_word']:
-						word_details = get_word_tuple(insert_node, insert_word)
+						word_details = get_word_tuple(insert_node, alt_word)
 						collection.append(word_details)
 
 			if i >= len(word): # needed because for-loop extends the word length
@@ -234,22 +239,41 @@ class Dictionary(object):
 
 		return remove_duplicates(collection)
 
-	def __replacementsearch__(self, word):
+	def __replacementsearch__(self, word, node, position=0, depth=0):
 		"""Find variations of a word where some letters are wrong"""
+		if depth >= (.25 * len(word)):
+			return []
+
 		collection = []
 
-		for i in range(len(word)):
-			word_list = list(word)
+		for i in range(position, len(word)):
+			for alt_node in node['children']:
+				if alt_node is not None:
+					# Construct a string of the word with replaced letter
+					alt_word = word[0:i] + alt_node['char'] + word[i + 1:]
 
-			for replacement in self.__ALPHABET__:
-				word_list[i] = replacement
-				new_word = ''.join(word_list)
+					# Extend the collection with a recursive call
+					collection += self.__replacementsearch__(
+						alt_word,
+						alt_node,
+						i + 1,
+						depth + 1
+					)
 
-				try:
-					word_details = self.find_word(new_word)
-					collection.append(word_details)
-				except:
-					pass
+					# Try to complete the word in the Dictionary tree
+					for j in range(i + 1, len(word)):
+						alt_node = self.__getnode__(alt_node, word[j])
+						if alt_node is None:
+							break
+
+					# Remember the word that was found by the replacement
+					if alt_node is not None and alt_node['is_word']:
+						word_details = get_word_tuple(alt_node, alt_word)
+						collection.append(word_details)
+
+			node = self.__getnode__(node, word[i])
+			if node is None:
+				break
 
 		return remove_duplicates(collection)
 
@@ -357,8 +381,8 @@ class Dictionary(object):
 		"""Find words similar to a given word in the dictionary"""
 		candidates = []
 		candidates += self.__bubblesearch__(word, self.__ROOT__)
-		candidates += self.__missingsearch__(word)
-		candidates += self.__replacementsearch__(word)
+		candidates += self.__insertionsearch__(word, self.__ROOT__)
+		candidates += self.__replacementsearch__(word, self.__ROOT__)
 		candidates += self.__spacesearch__(word)
 
 		collection = []

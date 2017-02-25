@@ -16,20 +16,20 @@ class testLearn(unittest.TestCase):
 		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [], [])]
-		actual = self.Dictionary.__bubblesearch__('foboar', self.Root) # Switched 'b' and 'o'
+		actual = self.Dictionary.__bubblesearch__('foboar', self.Root)
 		self.assertEqual(expected, actual)
 
-	# .__missingsearch__
-	def test_missingsearch(self):
-		"""Test to see if missing search works as expected"""
+	# .__insertionsearch__
+	def test_insertionsearch(self):
+		"""Test to see if insertion search works as expected"""
 		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [], [])]
-		actual = self.Dictionary.__missingsearch__('foobr') # Missing 'a'
+		actual = self.Dictionary.__insertionsearch__('foobr', self.Root)
 		self.assertEqual(expected, actual)
 
 		expected = [('foobar', 1, [], [], [])]
-		actual = self.Dictionary.__missingsearch__('foar') # Missing 'ob'
+		actual = self.Dictionary.__insertionsearch__('foar', self.Root)
 		self.assertEqual(expected, actual)
 
 	# .__replacementsearch__
@@ -38,7 +38,7 @@ class testLearn(unittest.TestCase):
 		self.Dictionary.learn_word('foobar')
 
 		expected = [('foobar', 1, [], [], [])]
-		actual = self.Dictionary.__replacementsearch__('boobar') # Replaced 'f' with 'b'
+		actual = self.Dictionary.__replacementsearch__('boobar', self.Root)
 		self.assertEqual(expected, actual)
 
 	# .__spacesearch__

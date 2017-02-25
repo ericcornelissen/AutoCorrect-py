@@ -40,7 +40,7 @@ import AutoCorrect
 my_dictionary = AutoCorrect.Dictionary()
 ```
 
-#### `.import()`
+#### `.Import()`
 Import an AutoCorrect dictionary from a file (or string) and get a new
 dictionary instance with the contents of the imported dictionary.
 
@@ -132,7 +132,7 @@ print(suggestions) # Gives ['foobar']
 
 | Parameter | Required | Description |
 |---|---|---|
-| prefix | no | A string of the prefix of choice. |
+| prefix | no | A string with the prefix of choice. |
 
 #### `.find_similar_words()`
 Find all similar words for a given string known to the dictionary using a
