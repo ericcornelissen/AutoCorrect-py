@@ -40,6 +40,12 @@ import AutoCorrect
 my_dictionary = AutoCorrect.Dictionary()
 ```
 
+#### Parameters
+| Parameter | Required | Description |
+|---|---|---|
+| alphabet | no | A list of characters that can exist in the dictionary |
+
+
 #### `.Import()`
 Import an AutoCorrect dictionary from a file (or string) and get a new
 dictionary instance with the contents of the imported dictionary.
@@ -50,16 +56,11 @@ my_dictionary = AutoCorrect.Import(path='./foobar.json')
 ```
 
 #### Parameters
-| Name   | Description                                               | Required |
-|--------|-----------------------------------------------------------|----------|
-| file   | A file object of the file that should be imported.        | Any      |
-| path   | A string of the path to the file that should be imported. | Any      |
-| string | A string of a serialized AutoCorrect Dictionary.          | Any      |
-
-#### Parameters
-| Name     | Description                                                                   | Required |
-|----------|-------------------------------------------------------------------------------|----------|
-| alphabet | The alphabet that the Dictionary uses, this is a list of possible characters. | No       |
+| Parameter | Required | Description |
+|---|---|---|
+| file | any | A file object of the file that should be imported. |
+| path | any | A string of the path to the file that should be imported. |
+| string | any | A string of a serialized AutoCorrect Dictionary. |
 
 ## Dictionary API
 #### `.learn_text()`
@@ -67,14 +68,14 @@ Learn all the words from a string of text to the dictionary. This method expects
 only one of the parameters to be provided.
 
 ```python
-my_dictionary.learn_text(text='This sentence has some mistakes in it.') # (Well... it doesn't)
+my_dictionary.learn_text(text='Hello world!')
 ```
 
 | Parameter | Required | Description |
 |---|---|---|
-| text | no | A string of the text to correct. |
-| file | no | The file with the text to correct. |
-| path | no | A string of the path to the file with the text to correct. |
+| text | any | A string of the text to correct. |
+| file | any | The file with the text to correct. |
+| path | any | A string of the path to the file with the text to correct. |
 
 #### `.learn_word()`
 Learn a single word to the dictionary.
@@ -97,15 +98,15 @@ alternative it can find. This method expects only one of the parameters to be
 provided.
 
 ```python
-corrected_text = my_dictionary.correct_text(text='This setnence has some mitakes in it.')
-print(corrected_text) # Gives 'This sentence has some mistakes in it.'
+corrected_text = my_dictionary.correct_text(text='Helol worl!')
+print(corrected_text) # Gives 'Hello world!'
 ```
 
 | Parameter | Required | Description |
 |---|---|---|
-| text | no | A string of the text to correct. |
-| file | no | The file with the text to correct. |
-| path | no | A string of the path to the file with the text to correct. |
+| text | any | A string of the text to correct. |
+| file | any | The file with the text to correct. |
+| path | any | A string of the path to the file with the text to correct. |
 
 #### `.correct_word()`
 Automatically correct a single word based on the contents of the dictionary.
@@ -220,8 +221,8 @@ my_dictionary.export(path='./foobar.json')
 
 | Parameter | Required | Description |
 |---|---|---|
-| file | no | The file to write the dictionary to. |
-| path | no | A string of the path to the file to write the dictionary to. |
+| file | any | The file to write the dictionary to. |
+| path | any | A string of the path to the file to write the dictionary to. |
 
 * * *
 
@@ -233,4 +234,4 @@ $ python -m unittest discover
 
 * * *
 
-Copyright © 2016-2017 Eric Cornelissen | MIT license
+Copyright © 2016-2017 Eric Cornelissen | [MIT license](LICENSE)
