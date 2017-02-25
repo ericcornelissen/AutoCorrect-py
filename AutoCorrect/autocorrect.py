@@ -9,7 +9,7 @@ simple learning algorithm.
 Copyright 2016 Eric Cornelissen
 Released under the MIT license
 
-Date: 25.02.2017
+Date: 26.02.2017
 """
 
 import copy
@@ -280,29 +280,36 @@ class Dictionary(object):
 	def __spacesearch__(self, word):
 		"""Find words that appear when the word is split in two"""
 		collection = []
+		for i in range(1, len(word)):
+			# Search the dictionary for the substring ending at index i
+			word_1 = self.__ROOT__
+			for char in word[:i]:
+				word_1 = self.__getnode__(word_1, char)
+				if word_1 is None: # Early out, longer prefixes won't exist
+					return collection
+			if not word_1['is_word']:
+				continue
 
-		word_list = list(word)
-		for i in range(len(word)):
-			word_1 = ''.join(word_list[:i])
-			word_2 = ''.join(word_list[i:])
+			# Search the dictionary for the substring starting at index i
+			word_2 = self.__ROOT__
+			for char in word[i:]:
+				word_2 = self.__getnode__(word_2, char)
+				if word_2 is None: # Early out, longer prefixes won't exist
+					return collection
+			if not word_2['is_word']:
+				continue
 
-			try:
-				word_1_details = self.find_word(word_1)
-				word_2_details = self.find_word(word_2)
+			# Found a possible combination of 2 words, create a node for them
+			node = self.__createchar__(word[-1])
+			node['is_word'] = True
+			node['follows'] = word_1['follows']
+			node['leads'] = word_2['leads']
+			for tup in word_1['leads']:
+				if tup[0] == word[i:]: # The string that word_1 leads == word_2
+					node['use_count'] = tup[1]
 
-				node = self.__createchar__('a')
-
-				for x in word_1_details[3]:
-					if x[0] == word_2:
-						node['use_count'] = x[1]
-
-				node['follows'] = word_1_details[2]
-				node['leads'] = word_2_details[3]
-
-				res = get_word_tuple(node, word_1 + ' ' + word_2)
-				collection.append(res)
-			except:
-				pass
+			word_details = get_word_tuple(node, word[:i] + ' ' + word[i:])
+			collection.append(word_details)
 
 		return remove_duplicates(collection)
 
