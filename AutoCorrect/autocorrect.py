@@ -6,10 +6,10 @@ a special dictionary that has build-in
 capabilities for autocorrecting based on a
 simple learning algorithm.
 
-Copyright 2016 Eric Cornelissen
+Copyright 2016-2017 Eric Cornelissen
 Released under the MIT license
 
-Date: 26.02.2017
+Date: 24.04.2017
 """
 
 import copy
@@ -22,14 +22,6 @@ RATING_EQUAL = 6
 RATING_FEEDBACK = 3
 RATING_FOLLOWS_LEADS = 1
 
-
-def char_index(char, alphabet):
-	"""Get the index of a character in an alphabet"""
-	try:
-		char = char.lower()
-		return alphabet.index(char)
-	except:
-		return -1
 
 def exclude_none(node):
 	"""Remove None values from a Dictionary for exporting"""
@@ -107,6 +99,7 @@ def remove_duplicates(original_list):
 	[unique_list.append(obj) for obj in original_list if obj not in unique_list]
 	return unique_list
 
+
 class Dictionary(object):
 	def __init__(self, alphabet=ALPHABET, root=None):
 		self.__ALPHABET__ = alphabet
@@ -116,15 +109,11 @@ class Dictionary(object):
 		else:
 			self.__ROOT__ = root
 
-	def __charindex__(self, char):
-		"""Get the charachter index in the alphabet"""
-		return char_index(char, self.__ALPHABET__)
-
 	def __createchar__(self, char):
 		"""Create a character dictionary"""
 		return {
 			'char': char.lower(),
-			'children': [None] * len(self.__ALPHABET__),
+			'children': {},
 			'feedback': [],
 			'follows': [],
 			'is_word': False,
@@ -133,8 +122,12 @@ class Dictionary(object):
 		}
 
 	def __getnode__(self, node, char):
-		index = self.__charindex__(char)
-		return node['children'][index]
+		char = char.lower()
+
+		if char in node['children']:
+			return node['children'][char]
+		else:
+			return None
 
 	def __traverse__(self, node=None, prefix=''):
 		"""Get all the words in the dictionary in a list"""
@@ -142,10 +135,7 @@ class Dictionary(object):
 			node = self.__ROOT__
 
 		collection = []
-		for node in node['children']:
-			if node is None:
-				continue
-
+		for _, node in node['children'].items():
 			if node['is_word']:
 				tup = get_word_tuple(node, prefix + node['char'])
 				collection.append(tup)
@@ -158,10 +148,10 @@ class Dictionary(object):
 		"""Find a word in the dictionary"""
 		current_node = self.__ROOT__
 		for char in word:
-			index = self.__charindex__(char)
-			current_node = current_node['children'][index]
-
-			if current_node is None:
+			char = char.lower()
+			if char in current_node['children']:
+				current_node = current_node['children'][char]
+			else:
 				raise LookupError
 
 		if current_node['is_word']:
@@ -206,29 +196,28 @@ class Dictionary(object):
 
 		collection = []
 		for i in range(position, len(word) + 1):
-			for insert_node in node['children']:
-				if insert_node is not None:
-					# Construct a string of the word with inserted letter
-					alt_word = word[0:i] + insert_node['char'] + word[i:]
+			for _, insert_node in node['children'].items():
+				# Construct a string of the word with inserted letter
+				alt_word = word[0:i] + insert_node['char'] + word[i:]
 
-					# Extend the collection with a recursive call
-					collection += self.__insertionsearch__(
-						alt_word,
-						insert_node,
-						i + 1,
-						depth + 1
-					)
+				# Extend the collection with a recursive call
+				collection += self.__insertionsearch__(
+					alt_word,
+					insert_node,
+					i + 1,
+					depth + 1
+				)
 
-					# Try to complete the word in the Dictionary tree
-					for j in range(i, len(word)):
-						insert_node = self.__getnode__(insert_node, word[j])
-						if insert_node is None:
-							break
+				# Try to complete the word in the Dictionary tree
+				for j in range(i, len(word)):
+					insert_node = self.__getnode__(insert_node, word[j])
+					if insert_node is None:
+						break
 
-					# Remember the word that was found by the insertion
-					if insert_node is not None and insert_node['is_word']:
-						word_details = get_word_tuple(insert_node, alt_word)
-						collection.append(word_details)
+				# Remember the word that was found by the insertion
+				if insert_node is not None and insert_node['is_word']:
+					word_details = get_word_tuple(insert_node, alt_word)
+					collection.append(word_details)
 
 			if i >= len(word): # needed because for-loop extends the word length
 				break
@@ -247,29 +236,28 @@ class Dictionary(object):
 		collection = []
 
 		for i in range(position, len(word)):
-			for alt_node in node['children']:
-				if alt_node is not None:
-					# Construct a string of the word with replaced letter
-					alt_word = word[0:i] + alt_node['char'] + word[i + 1:]
+			for _, alt_node in node['children'].items():
+				# Construct a string of the word with replaced letter
+				alt_word = word[0:i] + alt_node['char'] + word[i + 1:]
 
-					# Extend the collection with a recursive call
-					collection += self.__replacementsearch__(
-						alt_word,
-						alt_node,
-						i + 1,
-						depth + 1
-					)
+				# Extend the collection with a recursive call
+				collection += self.__replacementsearch__(
+					alt_word,
+					alt_node,
+					i + 1,
+					depth + 1
+				)
 
-					# Try to complete the word in the Dictionary tree
-					for j in range(i + 1, len(word)):
-						alt_node = self.__getnode__(alt_node, word[j])
-						if alt_node is None:
-							break
+				# Try to complete the word in the Dictionary tree
+				for j in range(i + 1, len(word)):
+					alt_node = self.__getnode__(alt_node, word[j])
+					if alt_node is None:
+						break
 
-					# Remember the word that was found by the replacement
-					if alt_node is not None and alt_node['is_word']:
-						word_details = get_word_tuple(alt_node, alt_word)
-						collection.append(word_details)
+				# Remember the word that was found by the replacement
+				if alt_node is not None and alt_node['is_word']:
+					word_details = get_word_tuple(alt_node, alt_word)
+					collection.append(word_details)
 
 			node = self.__getnode__(node, word[i])
 			if node is None:
@@ -327,12 +315,12 @@ class Dictionary(object):
 			follow, word, lead = word, lead, text[i]
 
 			prefix = ''
-			while self.__charindex__(word[0]) < 0:
+			while word[0] == ' ':
 				prefix = word[0]
 				word = word[1:]
 
 			suffix = ''
-			while self.__charindex__(word[-1:]) < 0:
+			while word[-1:] == ' ':
 				suffix += word[-1:]
 				word = word[:-1]
 
@@ -373,9 +361,9 @@ class Dictionary(object):
 		node = self.__ROOT__
 		charachters = list(prefix)
 
-		for character in charachters:
-			index = self.__charindex__(character)
-			newNode = node['children'][index]
+		for char in charachters:
+			char = char.lower()
+			newNode = node['children'][char]
 
 			if newNode is None:
 				return []
@@ -465,16 +453,12 @@ class Dictionary(object):
 
 		for i in range(len(word)):
 			char = word[i]
-			charachter_index = self.__charindex__(char)
+			char = char.lower()
 
-			if charachter_index < 0:
-				continue
+			if not char in current_node['children']:
+				current_node['children'][char] = self.__createchar__(char)
 
-			if current_node['children'][charachter_index] is None:
-				node = self.__createchar__(char)
-				current_node['children'][charachter_index] = node
-
-			current_node = current_node['children'][charachter_index]
+			current_node = current_node['children'][char]
 
 		current_node['is_word'] = True
 		current_node['use_count'] += 1
