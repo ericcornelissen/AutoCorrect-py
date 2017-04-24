@@ -23,6 +23,18 @@ RATING_FEEDBACK = 3
 RATING_FOLLOWS_LEADS = 1
 
 
+def create_char(char):
+	"""Create a character dictionary"""
+	return {
+		'char': char.lower(),
+		'children': {},
+		'feedback': [],
+		'follows': [],
+		'is_word': False,
+		'leads': [],
+		'use_count': 0
+	}
+
 def exclude_none(node):
 	"""Remove None values from a Dictionary for exporting"""
 	l = node['children']
@@ -105,23 +117,11 @@ class Dictionary(object):
 		self.__ALPHABET__ = alphabet
 
 		if root is None:
-			self.__ROOT__ = self.__createchar__('root')
+			self.__ROOT__ = create_char('root')
 		else:
 			self.__ROOT__ = root
 
-	def __createchar__(self, char):
-		"""Create a character dictionary"""
-		return {
-			'char': char.lower(),
-			'children': {},
-			'feedback': [],
-			'follows': [],
-			'is_word': False,
-			'leads': [],
-			'use_count': 0
-		}
-
-	def __getnode__(self, node, char):
+	def __getchild__(self, node, char):
 		char = char.lower()
 
 		if char in node['children']:
@@ -166,7 +166,7 @@ class Dictionary(object):
 		collection = []
 		for i in range(position, len(word) - 1):
 			# Find out if the current node has the next-next characters as child
-			swap_node = self.__getnode__(node, word[i + 1])
+			swap_node = self.__getchild__(node, word[i + 1])
 			if swap_node is not None:
 				# Create a string of the word with the two letters swapped
 				temp = list(word)
@@ -176,13 +176,13 @@ class Dictionary(object):
 				# Recursivly call BubbleSearch for more results
 				collection += self.__bubblesearch__(temp, swap_node, i + 1)
 
-			node = self.__getnode__(node, word[i])
+			node = self.__getchild__(node, word[i])
 			if node is None:
 				# Early out when the end of the word isn't reached
 				return collection
 
 		# Check if an exising word is created by adding the last character
-		node = self.__getnode__(node, word[-1])
+		node = self.__getchild__(node, word[-1])
 		if node is not None and node['is_word']:
 			word_details = get_word_tuple(node, word)
 			collection.append(word_details)
@@ -210,7 +210,7 @@ class Dictionary(object):
 
 				# Try to complete the word in the Dictionary tree
 				for j in range(i, len(word)):
-					insert_node = self.__getnode__(insert_node, word[j])
+					insert_node = self.__getchild__(insert_node, word[j])
 					if insert_node is None:
 						break
 
@@ -222,7 +222,7 @@ class Dictionary(object):
 			if i >= len(word): # needed because for-loop extends the word length
 				break
 
-			node = self.__getnode__(node, word[i])
+			node = self.__getchild__(node, word[i])
 			if node is None:
 				break
 
@@ -250,7 +250,7 @@ class Dictionary(object):
 
 				# Try to complete the word in the Dictionary tree
 				for j in range(i + 1, len(word)):
-					alt_node = self.__getnode__(alt_node, word[j])
+					alt_node = self.__getchild__(alt_node, word[j])
 					if alt_node is None:
 						break
 
@@ -259,7 +259,7 @@ class Dictionary(object):
 					word_details = get_word_tuple(alt_node, alt_word)
 					collection.append(word_details)
 
-			node = self.__getnode__(node, word[i])
+			node = self.__getchild__(node, word[i])
 			if node is None:
 				break
 
@@ -272,7 +272,7 @@ class Dictionary(object):
 			# Search the dictionary for the substring ending at index i
 			word_1 = self.__ROOT__
 			for char in word[:i]:
-				word_1 = self.__getnode__(word_1, char)
+				word_1 = self.__getchild__(word_1, char)
 				if word_1 is None: # Early out, longer prefixes won't exist
 					return collection
 			if not word_1['is_word']:
@@ -281,14 +281,14 @@ class Dictionary(object):
 			# Search the dictionary for the substring starting at index i
 			word_2 = self.__ROOT__
 			for char in word[i:]:
-				word_2 = self.__getnode__(word_2, char)
+				word_2 = self.__getchild__(word_2, char)
 				if word_2 is None: # Early out, longer prefixes won't exist
 					return collection
 			if not word_2['is_word']:
 				continue
 
 			# Found a possible combination of 2 words, create a node for them
-			node = self.__createchar__(word[-1])
+			node = create_char(word[-1])
 			node['is_word'] = True
 			node['follows'] = word_1['follows']
 			node['leads'] = word_2['leads']
@@ -456,7 +456,7 @@ class Dictionary(object):
 			char = char.lower()
 
 			if not char in current_node['children']:
-				current_node['children'][char] = self.__createchar__(char)
+				current_node['children'][char] = create_char(char)
 
 			current_node = current_node['children'][char]
 
@@ -468,7 +468,6 @@ class Dictionary(object):
 		if leads is not None:
 			get_surrounding_word_tuple(current_node, leads, 'leads')
 
-
 	def suggestion_feedback(self, incorrect, suggestion):
 		"""Provide manual feedback on suggestions by the Dictionary"""
 		node = self.__word__(suggestion)
@@ -477,7 +476,6 @@ class Dictionary(object):
 			node['feedback'].index(incorrect)
 		except:
 			node['feedback'].append(incorrect)
-
 
 	def unlearn(self, word, feedback=None, follows=None, leads=None):
 		"""Unlearn a word or something about a word"""
